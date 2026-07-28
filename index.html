@@ -1,15 +1,12 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Impromptu AI Speaker</title>
-
 <style>
-
 * {
-    box-sizing: border-box; 
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
     font-family: "Inter", "Segoe UI", sans-serif;
@@ -17,728 +14,500 @@
 
 body {
     min-height: 100vh;
-    background:
-        radial-gradient(circle at top left, #6366f1, transparent 40%),
-        radial-gradient(circle at bottom right, #06b6d4, transparent 40%),
-        #020617;
-
-    color: white;
+    background: #090D0C;
+    color: #F2E8DA;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 20px;
+    padding: 24px;
+    overflow: hidden;
+    position: relative;
 }
 
-.surprise-btn {
-
-    margin-top:15px;
-
-    width:100%;
-
-    background:
-    rgba(255,255,255,.15);
-
-    color:white;
-
-    border:
-    1px solid rgba(255,255,255,.2);
-
+body::before,
+body::after {
+    content: "";
+    position: fixed;
+    inset: -20%;
+    z-index: 0;
+    pointer-events: none;
+    filter: blur(70px);
+    opacity: 0.85;
+    animation: drift 18s ease-in-out infinite alternate;
 }
 
-
-.surprise-btn:hover {
-
-    transform:translateY(-3px);
-
-    background:
-    rgba(255,255,255,.25);
-
+body::before {
+    background: radial-gradient(circle at 20% 20%, rgba(92, 156, 114, 0.28), transparent 28%),
+                radial-gradient(circle at 80% 25%, rgba(74, 143, 138, 0.25), transparent 32%),
+                radial-gradient(circle at 50% 80%, rgba(216, 139, 82, 0.18), transparent 26%);
 }
 
-
-
-.prompt-box {
-
-    animation:
-    fadeIn .4s ease;
-
+body::after {
+    animation-duration: 24s;
+    background: radial-gradient(circle at 30% 80%, rgba(92, 156, 114, 0.18), transparent 22%),
+                radial-gradient(circle at 80% 70%, rgba(74, 143, 138, 0.2), transparent 24%);
 }
 
-
-
-@keyframes fadeIn {
-
-
-from {
-
-opacity:0;
-
-transform:
-translateY(10px);
-
+@keyframes drift {
+    from { transform: translate3d(-3%, -2%, 0) scale(1); }
+    to { transform: translate3d(3%, 2%, 0) scale(1.04); }
 }
 
-
-to {
-
-opacity:1;
-
-transform:
-translateY(0);
-
+.app-shell {
+    position: relative;
+    z-index: 1;
+    width: min(900px, 100%);
 }
 
-
-}
-
-
-
-.loading {
-
-animation:
-pulse 1s infinite;
-
-}
-
-
-
-@keyframes pulse {
-
-
-50% {
-
-opacity:.4;
-
-}
-
-
-}
-
-/* MAIN CARD */
-
-.container {
-
+.app-card {
+    position: relative;
     width: 100%;
-    max-width: 750px;
-
-    background:
-    rgba(255,255,255,0.08);
-
-    backdrop-filter: blur(20px);
-
-    border:
-    1px solid rgba(255,255,255,0.15);
-
-    border-radius: 30px;
-
-    padding: 40px;
-
-    box-shadow:
-    0 25px 60px rgba(0,0,0,.4);
-
+    min-height: 620px;
+    border-radius: 32px;
+    background: rgba(28, 27, 24, 0.78);
+    backdrop-filter: blur(28px);
+    border: 1px solid rgba(242, 232, 218, 0.12);
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.35);
+    overflow: hidden;
+    padding: 36px;
 }
 
-
-/* HEADER */
-
-.header {
-
-    text-align:center;
-    margin-bottom:35px;
-
+.setup-view,
+.presentation-view {
+    transition: all 0.35s ease;
 }
 
-
-.header h1 {
-
-    font-size:38px;
-    margin-bottom:10px;
-
+.setup-view {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 24px;
 }
 
-
-.header p {
-
-    color:#cbd5e1;
-    font-size:16px;
-
+.brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
 }
 
+.brand-badge {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, rgba(216, 139, 82, 0.35), rgba(94, 156, 114, 0.35));
+    border: 1px solid rgba(242, 232, 218, 0.16);
+    font-size: 24px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+}
 
+.brand h1 {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: 42px;
+    letter-spacing: 0.02em;
+    color: #F2E8DA;
+}
 
-/* CONTROLS */
+.brand p {
+    color: #AFA79A;
+    font-size: 15px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+}
 
+.panel {
+    width: min(100%, 620px);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
 
 .controls {
-
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:20px;
-
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
 }
-
 
 .field {
-
-    display:flex;
-    flex-direction:column;
-    gap:8px;
-
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
 }
-
 
 .field label {
-
-    color:#cbd5e1;
-    font-size:14px;
-
+    color: #AFA79A;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
 }
-
 
 select {
-
-    padding:14px;
-
-    border-radius:15px;
-
-    border:none;
-
-    background:
-    rgba(255,255,255,.12);
-
-    color:white;
-
-    font-size:16px;
-
-    outline:none;
-
+    padding: 14px 16px;
+    border-radius: 999px;
+    border: 1px solid rgba(242, 232, 218, 0.16);
+    background: rgba(17, 21, 19, 0.75);
+    color: #F2E8DA;
+    font-size: 15px;
+    outline: none;
+    appearance: none;
 }
-
 
 select option {
-
-    color:black;
-
+    color: #111513;
 }
 
-
-
-
-/* BUTTONS */
-
+.actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
 
 button {
-
-    cursor:pointer;
-
-    border:none;
-
-    border-radius:18px;
-
-    padding:16px;
-
-    font-size:16px;
-
-    font-weight:600;
-
-    transition:.25s;
-
+    cursor: pointer;
+    border: none;
+    border-radius: 999px;
+    padding: 13px 20px;
+    font-size: 15px;
+    font-weight: 600;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    font-family: inherit;
 }
 
-
-
-.generate-btn {
-
-    margin-top:25px;
-
-    width:100%;
-
-    background:
-    linear-gradient(135deg,#6366f1,#06b6d4);
-
-    color:white;
-
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
 }
 
-
-.generate-btn:hover {
-
-    transform:translateY(-3px);
-
-    box-shadow:
-    0 10px 30px rgba(99,102,241,.5);
-
+.generate-btn,
+.start-btn {
+    background: linear-gradient(135deg, #D88B52, #BE6D35);
+    color: #fff;
+    box-shadow: 0 12px 24px rgba(216, 139, 82, 0.18);
 }
 
+.surprise-btn,
+.close-btn {
+    background: transparent;
+    color: #F2E8DA;
+    border: 1px solid rgba(242, 232, 218, 0.2);
+}
 
+.challenge-block {
+    width: 100%;
+    padding-top: 10px;
+}
 
-
-/* PROMPT BOX */
-
+.challenge-label {
+    color: #AFA79A;
+    font-size: 12px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+}
 
 .prompt-box {
-
-    margin-top:30px;
-
-    padding:30px;
-
-    min-height:150px;
-
-    border-radius:25px;
-
-    background:
-    rgba(0,0,0,.25);
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    text-align:center;
-
-    font-size:24px;
-
-    line-height:1.5;
-
+    margin-top: 0;
+    padding: 10px 10px 6px;
+    min-height: 180px;
+    border-radius: 28px;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 30px;
+    line-height: 1.3;
+    color: #F2E8DA;
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-weight: 600;
+    letter-spacing: 0.01em;
 }
-
 
 .placeholder {
-
-    color:#94a3b8;
-
-    font-size:18px;
-
+    color: #AFA79A;
+    font-family: "Inter", "Segoe UI", sans-serif;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
 }
 
-
-
-
-/* TIMER */
-
-
-.timer-section {
-
-    margin-top:30px;
-
-    text-align:center;
-
+.presentation-view {
+    position: absolute;
+    inset: 0;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(12px) scale(0.98);
 }
 
+body.presentation-mode .setup-view {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-8px);
+}
+
+body.presentation-mode .presentation-view {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+}
+
+.close-btn {
+    position: absolute;
+    top: 22px;
+    right: 22px;
+    z-index: 3;
+}
+
+.presentation-inner {
+    width: 100%;
+    max-width: 760px;
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+    align-items: center;
+    text-align: center;
+}
+
+.presentation-challenge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.presentation-prompt {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: 42px;
+    line-height: 1.2;
+    color: #F2E8DA;
+    max-width: 640px;
+}
+
+.timer-panel {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.ring-wrap {
+    position: relative;
+    width: 240px;
+    height: 240px;
+    display: grid;
+    place-items: center;
+}
+
+.ring-wrap svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.ring-track,
+.ring-progress {
+    fill: none;
+    stroke-width: 10;
+}
+
+.ring-track {
+    stroke: rgba(242, 232, 218, 0.12);
+}
+
+.ring-progress {
+    stroke: #5E9C72;
+    stroke-linecap: round;
+    stroke-dasharray: 339;
+    stroke-dashoffset: 339;
+    transition: stroke-dashoffset 0.9s linear;
+}
+
+.timer-shell {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
 
 .timer {
-
-    font-size:60px;
-
-    font-weight:700;
-
-    margin:20px;
-
+    font-size: 54px;
+    font-weight: 700;
+    color: #F2E8DA;
+    font-family: "Inter", "Segoe UI", sans-serif;
 }
 
-
-
-.start-btn {
-
-    background:#22c55e;
-
-    color:white;
-
-    width:100%;
-
+.timer-caption {
+    color: #AFA79A;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.28em;
 }
-
-
-.start-btn:hover {
-
-    transform:scale(1.03);
-
-}
-
-
-
-/* PROGRESS */
-
-
-.progress-container {
-
-    height:14px;
-
-    background:
-    rgba(255,255,255,.15);
-
-    border-radius:20px;
-
-    overflow:hidden;
-
-    margin-top:20px;
-
-}
-
-
-.progress {
-
-    height:100%;
-
-    width:100%;
-
-    background:
-    linear-gradient(90deg,#22c55e,#06b6d4);
-
-    transition:width 1s linear;
-
-}
-
-
-
-/* SPEAKING GUIDE */
-
 
 .guide {
-
-    margin-top:30px;
-
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: min(100%, 540px);
 }
-
-
-.guide h2 {
-
-    text-align:center;
-
-    margin-bottom:20px;
-
-}
-
 
 .step {
-
-    padding:15px;
-
-    border-radius:15px;
-
-    background:
-    rgba(255,255,255,.08);
-
-    margin-bottom:12px;
-
-    transition:.3s;
-
+    padding: 12px 16px;
+    border-radius: 999px;
+    background: rgba(242, 232, 218, 0.06);
+    border: 1px solid rgba(242, 232, 218, 0.08);
+    color: #F2E8DA;
+    text-align: left;
+    font-size: 14px;
+    transition: all 0.25s ease;
 }
-
 
 .step span {
-
-    font-weight:bold;
-
+    font-weight: 600;
+    color: #F2E8DA;
 }
-
 
 .active {
-
-    background:
-    rgba(34,197,94,.35);
-
-    transform:scale(1.03);
-
+    background: rgba(94, 156, 114, 0.24);
+    border-color: rgba(94, 156, 114, 0.46);
+    transform: translateX(4px);
 }
 
-
-
-/* FOOTER */
-
+.progress {
+    position: absolute;
+    width: 0%;
+    height: 0;
+    opacity: 0;
+    pointer-events: none;
+}
 
 .footer {
-
-    text-align:center;
-
-    margin-top:30px;
-
-    color:#94a3b8;
-
-    font-size:13px;
-
+    text-align: center;
+    color: #AFA79A;
+    font-size: 13px;
+    margin-top: 12px;
 }
 
-
-
-/* RESPONSIVE */
-
-
-@media(max-width:600px){
-
-    .container {
-
-        padding:25px;
-
-    }
-
-
-    .controls {
-
-        grid-template-columns:1fr;
-
-    }
-
-
-    .header h1 {
-
-        font-size:30px;
-
-    }
-
-
-    .prompt-box {
-
-        font-size:20px;
-
-    }
-
-
-    .timer {
-
-        font-size:45px;
-
-    }
-
-
+@media (max-width: 760px) {
+    .app-card { padding: 26px; min-height: 580px; }
+    .brand h1 { font-size: 34px; }
+    .prompt-box { font-size: 24px; }
+    .presentation-prompt { font-size: 30px; }
+    .ring-wrap { width: 200px; height: 200px; }
+    .timer { font-size: 44px; }
 }
 
-
+@media (max-width: 600px) {
+    body { padding: 12px; }
+    .app-card { min-height: auto; padding: 20px; }
+    .controls { grid-template-columns: 1fr; }
+    .actions { flex-direction: column; }
+    button { width: 100%; }
+    .prompt-box { min-height: 140px; font-size: 22px; }
+    .presentation-view { padding: 18px; }
+    .presentation-inner { gap: 18px; }
+    .presentation-prompt { font-size: 24px; }
+    .ring-wrap { width: 180px; height: 180px; }
+    .timer { font-size: 38px; }
+    .step { border-radius: 18px; }
+}
 </style>
-
 </head>
-
-
 <body>
+<div class="app-shell">
+  <div class="app-card">
+    <section class="setup-view" id="setupView">
+      <div class="brand">
+        <div class="brand-badge">✦</div>
+        <h1>Think Quick!</h1>
+        <p>Think Fast. Speak Smart.</p>
+      </div>
+      <div class="panel">
+        <div class="controls">
+          <div class="field">
+            <label>Type</label>
+            <select id="type">
+              <option value="question">Question</option>
+              <option value="phrase">Word / Phrase</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Category</label>
+            <select id="category">
+              <option>Technology</option>
+              <option>Science</option>
+              <option>Nature</option>
+              <option>Philosophy</option>
+              <option>Education</option>
+              <option>Lifestyle</option>
+              <option>Business</option>
+              <option>History</option>
+              <option>Psychology</option>
+              <option>Entertainment</option>
+              <option>Sports</option>
+              <option>General</option>
+            </select>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="generate-btn" onclick="generatePrompt()">Generate Challenge</button>
+          <button class="surprise-btn" onclick="surpriseMe()">Surprise Me</button>
+          <button class="start-btn" onclick="startTimer()">Start 1-Minute Round</button>
+        </div>
+        <div class="challenge-block">
+          <p class="challenge-label">Current Challenge</p>
+          <div class="prompt-box" id="prompt">
+            <div class="placeholder">YOUR CHALLENGE</div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-
-<div class="container">
-
-
-<div class="header">
-
-<h1>🎤 Impromptu AI Speaker</h1>
-
-<p>
-Generate random questions and topics to practice speaking.
-</p>
-
+    <section class="presentation-view" id="presentationView" aria-hidden="true">
+      <button class="close-btn" onclick="exitPresentationMode()">Close</button>
+      <div class="presentation-inner">
+        <div class="presentation-challenge">
+          <p class="challenge-label">Current Challenge</p>
+          <div class="presentation-prompt" id="presentationPrompt">YOUR CHALLENGE</div>
+        </div>
+        <div class="timer-panel">
+          <div class="ring-wrap">
+            <svg viewBox="0 0 120 120">
+              <circle class="ring-track" cx="60" cy="60" r="54"></circle>
+              <circle class="ring-progress" id="ringProgress" cx="60" cy="60" r="54"></circle>
+            </svg>
+            <div class="timer-shell">
+              <div class="timer" id="timer">01:00</div>
+              <div class="timer-caption">Speak now</div>
+            </div>
+            <div class="progress" id="progress"></div>
+          </div>
+        </div>
+        <div class="guide">
+          <div class="step" id="point"><span>● Point</span></div>
+          <div class="step" id="reason"><span>○ Reason</span></div>
+          <div class="step" id="example"><span>○ Example</span></div>
+          <div class="step" id="conclusion"><span>○ Conclusion</span></div>
+        </div>
+      </div>
+    </section>
+  </div>
 </div>
-
-
-
-<div class="controls">
-
-
-<div class="field">
-
-<label>Type</label>
-
-<select id="type">
-
-<option value="question">
-Question
-</option>
-
-<option value="phrase">
-Word / Phrase
-</option>
-
-</select>
-
-</div>
-
-
-
-<div class="field">
-
-<label>Category</label>
-
-
-<select id="category">
-
-
-<option>Technology</option>
-
-<option>Science</option>
-
-<option>Nature</option>
-
-<option>Philosophy</option>
-
-<option>Education</option>
-
-<option>Lifestyle</option>
-
-<option>Business</option>
-
-<option>History</option>
-
-<option>Psychology</option>
-
-<option>Entertainment</option>
-
-<option>Sports</option>
-
-<option>General</option>
-
-
-</select>
-
-</div>
-
-
-</div>
-
-
-<button class="generate-btn" onclick="generatePrompt()">
-
-🎲 Generate Prompt
-
-</button>
-
-
-<button class="surprise-btn" onclick="surpriseMe()">
-
-✨ Surprise Me
-
-</button>
-
-
-
-<div class="prompt-box" id="prompt">
-
-<div class="placeholder">
-
-Your topic will appear here...
-
-</div>
-
-</div>
-
-
-
-
-<div class="timer-section">
-
-
-<div class="timer" id="timer">
-
-01:00
-
-</div>
-
-
-<button class="start-btn" onclick="startTimer()">
-
-▶ Start 1 Minute Timer
-
-</button>
-
-
-<div class="progress-container">
-
-<div class="progress" id="progress">
-
-</div>
-
-</div>
-
-
-</div>
-
-
-
-
-<div class="guide">
-
-
-<h2>
-Speaking Guide
-</h2>
-
-
-<div class="step" id="point">
-
-<span>
-🟢 Point (10 sec)
-</span>
-
-<br>
-
-State your opinion clearly.
-
-</div>
-
-
-<div class="step" id="reason">
-
-<span>
-🟡 Reason (15-20 sec)
-</span>
-
-<br>
-
-Explain why you think that.
-
-</div>
-
-
-<div class="step" id="example">
-
-<span>
-🔵 Example (20-25 sec)
-</span>
-
-<br>
-
-Give a real-life or hypothetical example.
-
-</div>
-
-
-<div class="step" id="conclusion">
-
-<span>
-🟣 Point (Conclusion) (5-10 sec)
-</span>
-
-<br>
-
-Restate your main idea and end confidently.
-
-</div>
-
-
-</div>
-
-
-
-<div class="footer">
-
-AI powered impromptu speaking practice
-
-</div>
-
-
-</div>
-
-
 <script>
-
-// ===============================
-// AI CONFIGURATION
-// ===============================
-
 const WORKER_URL = "https://cool-sound-1db8.amberprincessrosana.workers.dev/";
 const MODEL = "poolside/laguna-s-2.1:free";
-
-
-// ===============================
-// GENERATE PROMPT
-// Uses OpenRouter AI only; no fallback data
-// ===============================
 
 async function generatePrompt(){
     const type = document.getElementById("type").value;
@@ -748,34 +517,26 @@ async function generatePrompt(){
     console.log("Type:", type);
     console.log("Category:", category);
 
-    // show loading
-    promptBox.innerHTML = `
-        <div class="placeholder loading">✨ AI is thinking...</div>
-    `;
+    promptBox.innerHTML = `<div class="placeholder loading">✨ AI is thinking...</div>`;
+    syncChallengeToPresentation();
 
-    // Call AI
     try {
         const result = await generateAI(type, category);
 
-        // Ensure result is a string and not undefined/null
         if (typeof result === 'string' && result.trim().length > 0) {
-            // Use textContent to avoid injecting HTML
             promptBox.textContent = result.trim();
+            syncChallengeToPresentation();
         } else {
             console.error('AI returned empty result:', result);
             promptBox.innerHTML = `<div class="placeholder">❌ Failed to generate prompt. Please try again.</div>`;
+            syncChallengeToPresentation();
         }
     } catch (err) {
         console.error('generatePrompt error:', err);
         promptBox.innerHTML = `<div class="placeholder">❌ Failed to generate prompt. Please try again.</div>`;
+        syncChallengeToPresentation();
     }
-
 }
-
-
-// ===============================
-// OPENROUTER AI CALL
-// ===============================
 
 async function generateAI(type, category) {
     console.log('generateAI called with', { type, category });
@@ -796,14 +557,8 @@ async function generateAI(type, category) {
         response = await fetch(WORKER_URL, {
             signal: controller.signal,
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                model: MODEL,
-                messages: [{ role: 'user', content: instruction }],
-                temperature: 1
-            })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ model: MODEL, messages: [{ role: 'user', content: instruction }], temperature: 1 })
         });
     } catch (err) {
         clearTimeout(timeout);
@@ -814,9 +569,8 @@ async function generateAI(type, category) {
     clearTimeout(timeout);
 
     if (!response.ok) {
-        // Try to read error message from body
         let errBody = null;
-        try { errBody = await response.json(); } catch (e) { /* ignore */ }
+        try { errBody = await response.json(); } catch (e) {}
         console.error('OpenRouter responded with non-OK status', response.status, errBody);
         const msg = errBody?.error?.message || `OpenRouter API error: ${response.status}`;
         throw new Error(msg);
@@ -851,22 +605,28 @@ async function generateAI(type, category) {
         throw new Error('Invalid completion format from OpenRouter');
     }
 
-    // Trim and strip surrounding quotes if present
-    return content.trim().replace(/^['"]|['"]$/g, '');
+    return content.trim().replace(/^['\"]|['\"]$/g, '');
 }
 
+function syncChallengeToPresentation() {
+    const promptBox = document.getElementById('prompt');
+    const presentationPrompt = document.getElementById('presentationPrompt');
+    if (!promptBox || !presentationPrompt) return;
+    presentationPrompt.textContent = promptBox.textContent || promptBox.innerText || 'YOUR CHALLENGE';
+}
 
-// ===============================
-// SURPRISE FUNCTION
-// Use category select options instead of removed fallbackData
-// ===============================
+function enterPresentationMode() {
+    document.body.classList.add('presentation-mode');
+}
+
+function exitPresentationMode() {
+    document.body.classList.remove('presentation-mode');
+}
 
 function surpriseMe() {
     const types = ['question', 'phrase'];
     const typeSelect = document.getElementById('type');
     const categorySelect = document.getElementById('category');
-
-    // Get category option values (works if <option> has no value attribute)
     const categories = Array.from(categorySelect.options).map(opt => opt.value);
 
     typeSelect.value = types[Math.floor(Math.random() * types.length)];
@@ -876,8 +636,6 @@ function surpriseMe() {
     generatePrompt();
 }
 
-
-// SPACE KEY GENERATES
 document.addEventListener('keydown', function (e) {
     if (e.code === 'Space') {
         e.preventDefault();
@@ -885,26 +643,16 @@ document.addEventListener('keydown', function (e) {
     }
 });
 
-// ===============================
-// TIMER VARIABLES
-// (UNCHANGED)
-// ===============================
-
 let totalTime = 60;
 let timeLeft = 60;
 let timerInterval = null;
-
-
-// ===============================
-// START TIMER
-// (UNCHANGED)
-// ===============================
 
 function startTimer() {
     if (timerInterval) {
         clearInterval(timerInterval);
     }
 
+    enterPresentationMode();
     timeLeft = totalTime;
     updateTimer();
     clearSteps();
@@ -921,12 +669,6 @@ function startTimer() {
     }, 1000);
 }
 
-
-// ===============================
-// UPDATE TIMER DISPLAY
-// (UNCHANGED)
-// ===============================
-
 function updateTimer() {
     const timer = document.getElementById('timer');
     let minutes = Math.floor(timeLeft / 60);
@@ -936,13 +678,22 @@ function updateTimer() {
 
     const progress = document.getElementById('progress');
     progress.style.width = (timeLeft / totalTime * 100) + '%';
+    syncRingProgress();
 }
 
+function syncRingProgress() {
+    const progress = document.getElementById('progress');
+    const ring = document.getElementById('ringProgress');
+    if (!progress || !ring) return;
 
-// ===============================
-// SPEAKING GUIDE LOGIC
-// (UNCHANGED)
-// ===============================
+    const value = parseFloat(progress.style.width) || 0;
+    const pct = Math.max(0, Math.min(100, value));
+    const radius = 54;
+    const circumference = 2 * Math.PI * radius;
+    const offset = circumference * (1 - pct / 100);
+    ring.style.strokeDasharray = circumference;
+    ring.style.strokeDashoffset = offset;
+}
 
 function updateGuide() {
     clearSteps();
@@ -958,12 +709,6 @@ function updateGuide() {
     }
 }
 
-
-// ===============================
-// HIGHLIGHT STEP
-// (UNCHANGED)
-// ===============================
-
 function activateStep(id) {
     document.getElementById(id).classList.add('active');
 }
@@ -972,12 +717,6 @@ function clearSteps() {
     const steps = document.querySelectorAll('.step');
     steps.forEach(step => step.classList.remove('active'));
 }
-
-
-// ===============================
-// TIMER FINISHED
-// (UNCHANGED)
-// ===============================
 
 function timerFinished() {
     const timer = document.getElementById('timer');
@@ -988,9 +727,6 @@ function timerFinished() {
         alert('🎉 Time is up! Great job practicing!');
     }, 300);
 }
-
 </script>
-
 </body>
-
 </html>
