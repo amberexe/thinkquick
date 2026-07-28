@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Impromptu AI Speaker</title>
+
+<style>
+
+* {
+    box-sizing: border-box; 
+    margin: 0;
+    padding: 0;
+    font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at top left, #6366f1, transparent 40%),
+        radial-gradient(circle at bottom right, #06b6d4, transparent 40%),
+        #020617;
+
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.surprise-btn {
+
+    margin-top:15px;
+
+    width:100%;
+
+    background:
+    rgba(255,255,255,.15);
+
+    color:white;
+
+    border:
+    1px solid rgba(255,255,255,.2);
+
+}
+
+
+.surprise-btn:hover {
+
+    transform:translateY(-3px);
+
+    background:
+    rgba(255,255,255,.25);
+
+}
+
+
+
+.prompt-box {
+
+    animation:
+    fadeIn .4s ease;
+
+}
+
+
+
+@keyframes fadeIn {
+
+
+from {
+
+opacity:0;
+
+transform:
+translateY(10px);
+
+}
+
+
+to {
+
+opacity:1;
+
+transform:
+translateY(0);
+
+}
+
+
+}
+
+
+
+.loading {
+
+animation:
+pulse 1s infinite;
+
+}
+
+
+
+@keyframes pulse {
+
+
+50% {
+
+opacity:.4;
+
+}
+
+
+}
+
+/* MAIN CARD */
+
+.container {
+
+    width: 100%;
+    max-width: 750px;
+
+    background:
+    rgba(255,255,255,0.08);
+
+    backdrop-filter: blur(20px);
+
+    border:
+    1px solid rgba(255,255,255,0.15);
+
+    border-radius: 30px;
+
+    padding: 40px;
+
+    box-shadow:
+    0 25px 60px rgba(0,0,0,.4);
+
+}
+
+
+/* HEADER */
+
+.header {
+
+    text-align:center;
+    margin-bottom:35px;
+
+}
+
+
+.header h1 {
+
+    font-size:38px;
+    margin-bottom:10px;
+
+}
+
+
+.header p {
+
+    color:#cbd5e1;
+    font-size:16px;
+
+}
+
+
+
+/* CONTROLS */
+
+
+.controls {
+
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+
+}
+
+
+.field {
+
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+
+}
+
+
+.field label {
+
+    color:#cbd5e1;
+    font-size:14px;
+
+}
+
+
+select {
+
+    padding:14px;
+
+    border-radius:15px;
+
+    border:none;
+
+    background:
+    rgba(255,255,255,.12);
+
+    color:white;
+
+    font-size:16px;
+
+    outline:none;
+
+}
+
+
+select option {
+
+    color:black;
+
+}
+
+
+
+
+/* BUTTONS */
+
+
+button {
+
+    cursor:pointer;
+
+    border:none;
+
+    border-radius:18px;
+
+    padding:16px;
+
+    font-size:16px;
+
+    font-weight:600;
+
+    transition:.25s;
+
+}
+
+
+
+.generate-btn {
+
+    margin-top:25px;
+
+    width:100%;
+
+    background:
+    linear-gradient(135deg,#6366f1,#06b6d4);
+
+    color:white;
+
+}
+
+
+.generate-btn:hover {
+
+    transform:translateY(-3px);
+
+    box-shadow:
+    0 10px 30px rgba(99,102,241,.5);
+
+}
+
+
+
+
+/* PROMPT BOX */
+
+
+.prompt-box {
+
+    margin-top:30px;
+
+    padding:30px;
+
+    min-height:150px;
+
+    border-radius:25px;
+
+    background:
+    rgba(0,0,0,.25);
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    text-align:center;
+
+    font-size:24px;
+
+    line-height:1.5;
+
+}
+
+
+.placeholder {
+
+    color:#94a3b8;
+
+    font-size:18px;
+
+}
+
+
+
+
+/* TIMER */
+
+
+.timer-section {
+
+    margin-top:30px;
+
+    text-align:center;
+
+}
+
+
+.timer {
+
+    font-size:60px;
+
+    font-weight:700;
+
+    margin:20px;
+
+}
+
+
+
+.start-btn {
+
+    background:#22c55e;
+
+    color:white;
+
+    width:100%;
+
+}
+
+
+.start-btn:hover {
+
+    transform:scale(1.03);
+
+}
+
+
+
+/* PROGRESS */
+
+
+.progress-container {
+
+    height:14px;
+
+    background:
+    rgba(255,255,255,.15);
+
+    border-radius:20px;
+
+    overflow:hidden;
+
+    margin-top:20px;
+
+}
+
+
+.progress {
+
+    height:100%;
+
+    width:100%;
+
+    background:
+    linear-gradient(90deg,#22c55e,#06b6d4);
+
+    transition:width 1s linear;
+
+}
+
+
+
+/* SPEAKING GUIDE */
+
+
+.guide {
+
+    margin-top:30px;
+
+}
+
+
+.guide h2 {
+
+    text-align:center;
+
+    margin-bottom:20px;
+
+}
+
+
+.step {
+
+    padding:15px;
+
+    border-radius:15px;
+
+    background:
+    rgba(255,255,255,.08);
+
+    margin-bottom:12px;
+
+    transition:.3s;
+
+}
+
+
+.step span {
+
+    font-weight:bold;
+
+}
+
+
+.active {
+
+    background:
+    rgba(34,197,94,.35);
+
+    transform:scale(1.03);
+
+}
+
+
+
+/* FOOTER */
+
+
+.footer {
+
+    text-align:center;
+
+    margin-top:30px;
+
+    color:#94a3b8;
+
+    font-size:13px;
+
+}
+
+
+
+/* RESPONSIVE */
+
+
+@media(max-width:600px){
+
+    .container {
+
+        padding:25px;
+
+    }
+
+
+    .controls {
+
+        grid-template-columns:1fr;
+
+    }
+
+
+    .header h1 {
+
+        font-size:30px;
+
+    }
+
+
+    .prompt-box {
+
+        font-size:20px;
+
+    }
+
+
+    .timer {
+
+        font-size:45px;
+
+    }
+
+
+}
+
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+<div class="header">
+
+<h1>🎤 Impromptu AI Speaker</h1>
+
+<p>
+Generate random questions and topics to practice speaking.
+</p>
+
+</div>
+
+
+
+<div class="controls">
+
+
+<div class="field">
+
+<label>Type</label>
+
+<select id="type">
+
+<option value="question">
+Question
+</option>
+
+<option value="phrase">
+Word / Phrase
+</option>
+
+</select>
+
+</div>
+
+
+
+<div class="field">
+
+<label>Category</label>
+
+
+<select id="category">
+
+
+<option>Technology</option>
+
+<option>Science</option>
+
+<option>Nature</option>
+
+<option>Philosophy</option>
+
+<option>Education</option>
+
+<option>Lifestyle</option>
+
+<option>Business</option>
+
+<option>History</option>
+
+<option>Psychology</option>
+
+<option>Entertainment</option>
+
+<option>Sports</option>
+
+<option>General</option>
+
+
+</select>
+
+</div>
+
+
+</div>
+
+
+<button class="generate-btn" onclick="generatePrompt()">
+
+🎲 Generate Prompt
+
+</button>
+
+
+<button class="surprise-btn" onclick="surpriseMe()">
+
+✨ Surprise Me
+
+</button>
+
+
+
+<div class="prompt-box" id="prompt">
+
+<div class="placeholder">
+
+Your topic will appear here...
+
+</div>
+
+</div>
+
+
+
+
+<div class="timer-section">
+
+
+<div class="timer" id="timer">
+
+01:00
+
+</div>
+
+
+<button class="start-btn" onclick="startTimer()">
+
+▶ Start 1 Minute Timer
+
+</button>
+
+
+<div class="progress-container">
+
+<div class="progress" id="progress">
+
+</div>
+
+</div>
+
+
+</div>
+
+
+
+
+<div class="guide">
+
+
+<h2>
+Speaking Guide
+</h2>
+
+
+<div class="step" id="point">
+
+<span>
+🟢 Point (10 sec)
+</span>
+
+<br>
+
+State your opinion clearly.
+
+</div>
+
+
+<div class="step" id="reason">
+
+<span>
+🟡 Reason (15-20 sec)
+</span>
+
+<br>
+
+Explain why you think that.
+
+</div>
+
+
+<div class="step" id="example">
+
+<span>
+🔵 Example (20-25 sec)
+</span>
+
+<br>
+
+Give a real-life or hypothetical example.
+
+</div>
+
+
+<div class="step" id="conclusion">
+
+<span>
+🟣 Point (Conclusion) (5-10 sec)
+</span>
+
+<br>
+
+Restate your main idea and end confidently.
+
+</div>
+
+
+</div>
+
+
+
+<div class="footer">
+
+AI powered impromptu speaking practice
+
+</div>
+
+
+</div>
+
+
+<script>
+
+// ===============================
+// AI CONFIGURATION
+// ===============================
+
+const WORKER_URL = "https://cool-sound-1db8.amberprincessrosana.workers.dev/";
+const MODEL = "poolside/laguna-s-2.1:free";
+
+
+// ===============================
+// GENERATE PROMPT
+// Uses OpenRouter AI only; no fallback data
+// ===============================
+
+async function generatePrompt(){
+    const type = document.getElementById("type").value;
+    const category = document.getElementById("category").value;
+    const promptBox = document.getElementById("prompt");
+
+    console.log("Type:", type);
+    console.log("Category:", category);
+
+    // show loading
+    promptBox.innerHTML = `
+        <div class="placeholder loading">✨ AI is thinking...</div>
+    `;
+
+    // Call AI
+    try {
+        const result = await generateAI(type, category);
+
+        // Ensure result is a string and not undefined/null
+        if (typeof result === 'string' && result.trim().length > 0) {
+            // Use textContent to avoid injecting HTML
+            promptBox.textContent = result.trim();
+        } else {
+            console.error('AI returned empty result:', result);
+            promptBox.innerHTML = `<div class="placeholder">❌ Failed to generate prompt. Please try again.</div>`;
+        }
+    } catch (err) {
+        console.error('generatePrompt error:', err);
+        promptBox.innerHTML = `<div class="placeholder">❌ Failed to generate prompt. Please try again.</div>`;
+    }
+
+}
+
+
+// ===============================
+// OPENROUTER AI CALL
+// ===============================
+
+async function generateAI(type, category) {
+    console.log('generateAI called with', { type, category });
+
+    let instruction;
+
+    if (type === 'question') {
+        instruction = `Generate ONE impromptu speaking question.\n\nCategory:\n${category}\n\nRules:\n- Only return the question\n- One sentence only\n- Easy for students\n- Good for a 1 minute speech\n- No explanation\n- No numbering`;
+    } else {
+        instruction = `Generate ONE random speaking word or phrase.\n\nCategory:\n${category}\n\nRules:\n- 1 to 3 words only\n- Good for speaking practice\n- No explanation\n- No quotation marks`;
+    }
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+
+    let response;
+    try {
+        response = await fetch(WORKER_URL, {
+            signal: controller.signal,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: MODEL,
+                messages: [{ role: 'user', content: instruction }],
+                temperature: 1
+            })
+        });
+    } catch (err) {
+        clearTimeout(timeout);
+        console.error('Network or fetch error:', err);
+        throw new Error('Network error while contacting OpenRouter API');
+    }
+
+    clearTimeout(timeout);
+
+    if (!response.ok) {
+        // Try to read error message from body
+        let errBody = null;
+        try { errBody = await response.json(); } catch (e) { /* ignore */ }
+        console.error('OpenRouter responded with non-OK status', response.status, errBody);
+        const msg = errBody?.error?.message || `OpenRouter API error: ${response.status}`;
+        throw new Error(msg);
+    }
+
+    let data;
+    try {
+        data = await response.json();
+    } catch (err) {
+        console.error('Failed to parse OpenRouter JSON response:', err);
+        throw new Error('Invalid JSON from OpenRouter API');
+    }
+
+    console.log('AI Response:', data);
+
+    if (data?.error) {
+        const message = data.error.message || 'OpenRouter returned an error';
+        console.error('OpenRouter error payload:', data.error);
+        throw new Error(message);
+    }
+
+    if (!Array.isArray(data.choices) || data.choices.length === 0) {
+        console.error('No choices in OpenRouter response:', data);
+        throw new Error('No completion returned from OpenRouter');
+    }
+
+    const choice = data.choices[0];
+    const content = choice?.message?.content || choice?.text || '';
+
+    if (!content || typeof content !== 'string') {
+        console.error('Unexpected content format:', choice);
+        throw new Error('Invalid completion format from OpenRouter');
+    }
+
+    // Trim and strip surrounding quotes if present
+    return content.trim().replace(/^['"]|['"]$/g, '');
+}
+
+
+// ===============================
+// SURPRISE FUNCTION
+// Use category select options instead of removed fallbackData
+// ===============================
+
+function surpriseMe() {
+    const types = ['question', 'phrase'];
+    const typeSelect = document.getElementById('type');
+    const categorySelect = document.getElementById('category');
+
+    // Get category option values (works if <option> has no value attribute)
+    const categories = Array.from(categorySelect.options).map(opt => opt.value);
+
+    typeSelect.value = types[Math.floor(Math.random() * types.length)];
+    const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+    categorySelect.value = randomCategory;
+
+    generatePrompt();
+}
+
+
+// SPACE KEY GENERATES
+document.addEventListener('keydown', function (e) {
+    if (e.code === 'Space') {
+        e.preventDefault();
+        generatePrompt();
+    }
+});
+
+// ===============================
+// TIMER VARIABLES
+// (UNCHANGED)
+// ===============================
+
+let totalTime = 60;
+let timeLeft = 60;
+let timerInterval = null;
+
+
+// ===============================
+// START TIMER
+// (UNCHANGED)
+// ===============================
+
+function startTimer() {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+    }
+
+    timeLeft = totalTime;
+    updateTimer();
+    clearSteps();
+
+    timerInterval = setInterval(() => {
+        timeLeft--;
+        updateTimer();
+        updateGuide();
+
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            timerFinished();
+        }
+    }, 1000);
+}
+
+
+// ===============================
+// UPDATE TIMER DISPLAY
+// (UNCHANGED)
+// ===============================
+
+function updateTimer() {
+    const timer = document.getElementById('timer');
+    let minutes = Math.floor(timeLeft / 60);
+    let seconds = timeLeft % 60;
+
+    timer.innerHTML = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+    const progress = document.getElementById('progress');
+    progress.style.width = (timeLeft / totalTime * 100) + '%';
+}
+
+
+// ===============================
+// SPEAKING GUIDE LOGIC
+// (UNCHANGED)
+// ===============================
+
+function updateGuide() {
+    clearSteps();
+
+    if (timeLeft <= 60 && timeLeft >= 50) {
+        activateStep('point');
+    } else if (timeLeft < 50 && timeLeft >= 35) {
+        activateStep('reason');
+    } else if (timeLeft < 35 && timeLeft >= 10) {
+        activateStep('example');
+    } else if (timeLeft < 10) {
+        activateStep('conclusion');
+    }
+}
+
+
+// ===============================
+// HIGHLIGHT STEP
+// (UNCHANGED)
+// ===============================
+
+function activateStep(id) {
+    document.getElementById(id).classList.add('active');
+}
+
+function clearSteps() {
+    const steps = document.querySelectorAll('.step');
+    steps.forEach(step => step.classList.remove('active'));
+}
+
+
+// ===============================
+// TIMER FINISHED
+// (UNCHANGED)
+// ===============================
+
+function timerFinished() {
+    const timer = document.getElementById('timer');
+    timer.innerHTML = '00:00';
+    clearSteps();
+    document.getElementById('conclusion').classList.add('active');
+    setTimeout(() => {
+        alert('🎉 Time is up! Great job practicing!');
+    }, 300);
+}
+
+</script>
+
+</body>
+
+</html>
