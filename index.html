@@ -3,8 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Impromptu AI Speaker</title>
+<title>Think Quick!</title>
 <style>
+:root {
+    color-scheme: dark;
+    --bg: #080817;
+    --glass: rgba(18, 20, 35, 0.55);
+    --glass-strong: rgba(22, 26, 42, 0.74);
+    --border: rgba(255, 255, 255, 0.08);
+    --text: #F5F7FF;
+    --muted: #AAB3D4;
+    --blue: #63A7FF;
+    --purple: #8B7CFF;
+    --cyan: #55E6FF;
+    --magenta: #E77CFF;
+}
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -14,12 +28,12 @@
 
 body {
     min-height: 100vh;
-    background: #090D0C;
-    color: #F2E8DA;
+    background: var(--bg);
+    color: var(--text);
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 24px;
+    padding: clamp(12px, 2vw, 24px);
     overflow: hidden;
     position: relative;
 }
@@ -28,27 +42,29 @@ body::before,
 body::after {
     content: "";
     position: fixed;
-    inset: -20%;
+    inset: -24%;
     z-index: 0;
     pointer-events: none;
-    filter: blur(70px);
-    opacity: 0.85;
-    animation: drift 18s ease-in-out infinite alternate;
+    filter: blur(280px);
+    opacity: 0.16;
+    animation: auroraDrift 34s ease-in-out infinite alternate;
 }
 
 body::before {
-    background: radial-gradient(circle at 20% 20%, rgba(92, 156, 114, 0.28), transparent 28%),
-                radial-gradient(circle at 80% 25%, rgba(74, 143, 138, 0.25), transparent 32%),
-                radial-gradient(circle at 50% 80%, rgba(216, 139, 82, 0.18), transparent 26%);
+    background: radial-gradient(circle at 18% 18%, rgba(99, 167, 255, 0.22), transparent 34%),
+                radial-gradient(circle at 82% 20%, rgba(139, 124, 255, 0.2), transparent 36%),
+                radial-gradient(circle at 52% 84%, rgba(85, 230, 255, 0.16), transparent 30%),
+                radial-gradient(circle at 32% 74%, rgba(231, 124, 255, 0.16), transparent 24%);
 }
 
 body::after {
-    animation-duration: 24s;
-    background: radial-gradient(circle at 30% 80%, rgba(92, 156, 114, 0.18), transparent 22%),
-                radial-gradient(circle at 80% 70%, rgba(74, 143, 138, 0.2), transparent 24%);
+    animation-duration: 40s;
+    background: radial-gradient(circle at 78% 78%, rgba(99, 167, 255, 0.16), transparent 28%),
+                radial-gradient(circle at 20% 80%, rgba(139, 124, 255, 0.18), transparent 34%),
+                radial-gradient(circle at 56% 24%, rgba(85, 230, 255, 0.14), transparent 24%);
 }
 
-@keyframes drift {
+@keyframes auroraDrift {
     from { transform: translate3d(-3%, -2%, 0) scale(1); }
     to { transform: translate3d(3%, 2%, 0) scale(1.04); }
 }
@@ -56,25 +72,25 @@ body::after {
 .app-shell {
     position: relative;
     z-index: 1;
-    width: min(900px, 100%);
+    width: min(960px, 100%);
 }
 
 .app-card {
     position: relative;
     width: 100%;
-    min-height: 620px;
-    border-radius: 32px;
-    background: rgba(28, 27, 24, 0.78);
-    backdrop-filter: blur(28px);
-    border: 1px solid rgba(242, 232, 218, 0.12);
-    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.35);
+    min-height: min(78vh, 700px);
+    border-radius: clamp(22px, 3vw, 32px);
+    background: var(--glass);
+    backdrop-filter: blur(26px);
+    border: 1px solid var(--border);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
     overflow: hidden;
-    padding: 36px;
+    padding: clamp(20px, 2.6vw, 36px);
 }
 
 .setup-view,
 .presentation-view {
-    transition: all 0.35s ease;
+    transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .setup-view {
@@ -82,7 +98,7 @@ body::after {
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 24px;
+    gap: clamp(16px, 2vw, 24px);
 }
 
 .brand {
@@ -93,42 +109,42 @@ body::after {
 }
 
 .brand-badge {
-    width: 58px;
-    height: 58px;
+    width: clamp(48px, 5vw, 58px);
+    height: clamp(48px, 5vw, 58px);
     border-radius: 50%;
     display: grid;
     place-items: center;
-    background: linear-gradient(135deg, rgba(216, 139, 82, 0.35), rgba(94, 156, 114, 0.35));
-    border: 1px solid rgba(242, 232, 218, 0.16);
+    background: linear-gradient(135deg, rgba(99, 167, 255, 0.2), rgba(139, 124, 255, 0.2));
+    border: 1px solid rgba(255, 255, 255, 0.14);
     font-size: 24px;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
 }
 
 .brand h1 {
     font-family: "Cormorant Garamond", Georgia, serif;
-    font-size: 42px;
+    font-size: clamp(1.9rem, 3.4vw, 2.7rem);
     letter-spacing: 0.02em;
-    color: #F2E8DA;
+    color: var(--text);
 }
 
 .brand p {
-    color: #AFA79A;
-    font-size: 15px;
+    color: var(--muted);
+    font-size: 0.82rem;
     letter-spacing: 0.24em;
     text-transform: uppercase;
 }
 
 .panel {
-    width: min(100%, 620px);
+    width: min(100%, 640px);
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: clamp(14px, 1.8vw, 20px);
 }
 
 .controls {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
+    gap: clamp(12px, 1.4vw, 16px);
 }
 
 .field {
@@ -139,25 +155,38 @@ body::after {
 }
 
 .field label {
-    color: #AFA79A;
-    font-size: 13px;
+    color: var(--muted);
+    font-size: 0.76rem;
     text-transform: uppercase;
     letter-spacing: 0.18em;
 }
 
 select {
-    padding: 14px 16px;
+    padding: 0.9rem 1rem;
     border-radius: 999px;
-    border: 1px solid rgba(242, 232, 218, 0.16);
-    background: rgba(17, 21, 19, 0.75);
-    color: #F2E8DA;
-    font-size: 15px;
+    border: 1px solid var(--border);
+    background: rgba(13, 15, 27, 0.88);
+    color: var(--text);
+    font-size: 0.95rem;
     outline: none;
     appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23AAB3D4' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 0.9rem;
+    padding-right: 2.6rem;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
 }
 
 select option {
-    color: #111513;
+    background: #0f1122;
+    color: var(--text);
+}
+
+select:focus {
+    outline: none;
+    border-color: rgba(99, 167, 255, 0.45);
+    box-shadow: 0 0 0 4px rgba(99, 167, 255, 0.12);
 }
 
 .actions {
@@ -167,79 +196,124 @@ select option {
     flex-wrap: wrap;
 }
 
+.challenge-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 0.85rem;
+}
+
 button {
     cursor: pointer;
     border: none;
     border-radius: 999px;
-    padding: 13px 20px;
-    font-size: 15px;
+    padding: 0.9rem 1.2rem;
+    font-size: 0.95rem;
     font-weight: 600;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
     font-family: inherit;
+    color: var(--text);
+    background: var(--glass);
+    border: 1px solid var(--border);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.16);
+    backdrop-filter: blur(18px);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18);
+    box-shadow: 0 16px 34px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(255,255,255,0.04);
 }
 
-.generate-btn,
-.start-btn {
-    background: linear-gradient(135deg, #D88B52, #BE6D35);
+.generate-btn {
+    background: linear-gradient(135deg, rgba(99, 167, 255, 0.95), rgba(139, 124, 255, 0.92));
     color: #fff;
-    box-shadow: 0 12px 24px rgba(216, 139, 82, 0.18);
+    box-shadow: 0 18px 40px rgba(99, 167, 255, 0.22);
+    font-weight: 700;
 }
 
-.surprise-btn,
+.generate-btn:hover {
+    box-shadow: 0 22px 46px rgba(99, 167, 255, 0.28);
+}
+
+.start-btn {
+    display: none;
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+    background: linear-gradient(135deg, rgba(255,255,255,0.11), rgba(255,255,255,0.04));
+    border-color: rgba(255,255,255,0.14);
+    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.16);
+}
+
+.start-btn.is-visible {
+    display: inline-flex;
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    animation: riseIn 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.surprise-btn {
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text);
+}
+
 .close-btn {
-    background: transparent;
-    color: #F2E8DA;
-    border: 1px solid rgba(242, 232, 218, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text);
+    border: 1px solid rgba(255,255,255,0.1);
 }
 
 .challenge-block {
     width: 100%;
-    padding-top: 10px;
+    padding-top: 6px;
 }
 
 .challenge-label {
-    color: #AFA79A;
-    font-size: 12px;
+    color: var(--muted);
+    font-size: 0.72rem;
     letter-spacing: 0.28em;
     text-transform: uppercase;
-    margin-bottom: 12px;
+    margin-bottom: 0.85rem;
 }
 
 .prompt-box {
     margin-top: 0;
-    padding: 10px 10px 6px;
-    min-height: 180px;
-    border-radius: 28px;
-    background: transparent;
+    padding: clamp(1rem, 2vw, 1.3rem);
+    min-height: clamp(8rem, 12vw, 10rem);
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.04);
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
-    font-size: 30px;
-    line-height: 1.3;
-    color: #F2E8DA;
+    font-size: clamp(1.1rem, 2.2vw, 1.75rem);
+    line-height: 1.35;
+    color: var(--text);
     font-family: "Cormorant Garamond", Georgia, serif;
     font-weight: 600;
     letter-spacing: 0.01em;
+    border: 1px solid rgba(255,255,255,0.06);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+    backdrop-filter: blur(16px);
+}
+
+.prompt-box.is-animating {
+    animation: challengeReveal 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .placeholder {
-    color: #AFA79A;
+    color: var(--muted);
     font-family: "Inter", "Segoe UI", sans-serif;
-    font-size: 14px;
+    font-size: 0.78rem;
     text-transform: uppercase;
-    letter-spacing: 0.3em;
+    letter-spacing: 0.34em;
 }
 
 .presentation-view {
     position: absolute;
     inset: 0;
-    padding: 24px;
+    padding: clamp(16px, 2vw, 24px);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -263,8 +337,8 @@ body.presentation-mode .presentation-view {
 
 .close-btn {
     position: absolute;
-    top: 22px;
-    right: 22px;
+    top: clamp(14px, 2vw, 22px);
+    right: clamp(14px, 2vw, 22px);
     z-index: 3;
 }
 
@@ -273,7 +347,7 @@ body.presentation-mode .presentation-view {
     max-width: 760px;
     display: flex;
     flex-direction: column;
-    gap: 26px;
+    gap: clamp(18px, 2.4vw, 26px);
     align-items: center;
     text-align: center;
 }
@@ -287,9 +361,9 @@ body.presentation-mode .presentation-view {
 
 .presentation-prompt {
     font-family: "Cormorant Garamond", Georgia, serif;
-    font-size: 42px;
+    font-size: clamp(1.45rem, 3vw, 2.45rem);
     line-height: 1.2;
-    color: #F2E8DA;
+    color: var(--text);
     max-width: 640px;
 }
 
@@ -302,8 +376,8 @@ body.presentation-mode .presentation-view {
 
 .ring-wrap {
     position: relative;
-    width: 240px;
-    height: 240px;
+    width: min(240px, 58vw);
+    aspect-ratio: 1;
     display: grid;
     place-items: center;
 }
@@ -321,15 +395,16 @@ body.presentation-mode .presentation-view {
 }
 
 .ring-track {
-    stroke: rgba(242, 232, 218, 0.12);
+    stroke: rgba(255,255,255,0.08);
 }
 
 .ring-progress {
-    stroke: #5E9C72;
+    stroke: #76C9FF;
     stroke-linecap: round;
     stroke-dasharray: 339;
     stroke-dashoffset: 339;
     transition: stroke-dashoffset 0.9s linear;
+    filter: drop-shadow(0 0 12px rgba(99, 167, 255, 0.2));
 }
 
 .timer-shell {
@@ -343,15 +418,15 @@ body.presentation-mode .presentation-view {
 }
 
 .timer {
-    font-size: 54px;
+    font-size: clamp(2.1rem, 4.5vw, 3.2rem);
     font-weight: 700;
-    color: #F2E8DA;
+    color: var(--text);
     font-family: "Inter", "Segoe UI", sans-serif;
 }
 
 .timer-caption {
-    color: #AFA79A;
-    font-size: 13px;
+    color: var(--muted);
+    font-size: 0.76rem;
     text-transform: uppercase;
     letter-spacing: 0.28em;
 }
@@ -360,29 +435,66 @@ body.presentation-mode .presentation-view {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    width: min(100%, 540px);
+    width: min(100%, 520px);
 }
 
 .step {
-    padding: 12px 16px;
+    padding: 0.8rem 1rem;
     border-radius: 999px;
-    background: rgba(242, 232, 218, 0.06);
-    border: 1px solid rgba(242, 232, 218, 0.08);
-    color: #F2E8DA;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--text);
     text-align: left;
-    font-size: 14px;
+    font-size: clamp(0.85rem, 1.1vw, 0.96rem);
     transition: all 0.25s ease;
+    backdrop-filter: blur(12px);
 }
 
 .step span {
     font-weight: 600;
-    color: #F2E8DA;
+    color: var(--text);
 }
 
 .active {
-    background: rgba(94, 156, 114, 0.24);
-    border-color: rgba(94, 156, 114, 0.46);
+    background: rgba(99, 167, 255, 0.18);
+    border-color: rgba(99, 167, 255, 0.3);
     transform: translateX(4px);
+    box-shadow: inset 0 0 0 1px rgba(99, 167, 255, 0.16);
+}
+
+.completion-card {
+    width: min(100%, 520px);
+    padding: 1rem 1.1rem;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(99, 167, 255, 0.14), rgba(139, 124, 255, 0.12));
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(16px);
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    opacity: 0;
+    transform: translateY(8px);
+    pointer-events: none;
+    transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.completion-card.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    animation: completionGlow 0.5s ease;
+}
+
+.completion-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.completion-copy {
+    color: var(--muted);
+    font-size: 0.95rem;
+    line-height: 1.45;
 }
 
 .progress {
@@ -395,33 +507,49 @@ body.presentation-mode .presentation-view {
 
 .footer {
     text-align: center;
-    color: #AFA79A;
-    font-size: 13px;
+    color: var(--muted);
+    font-size: 0.8rem;
     margin-top: 12px;
 }
 
-@media (max-width: 760px) {
-    .app-card { padding: 26px; min-height: 580px; }
-    .brand h1 { font-size: 34px; }
-    .prompt-box { font-size: 24px; }
-    .presentation-prompt { font-size: 30px; }
-    .ring-wrap { width: 200px; height: 200px; }
-    .timer { font-size: 44px; }
+@keyframes challengeReveal {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-@media (max-width: 600px) {
-    body { padding: 12px; }
-    .app-card { min-height: auto; padding: 20px; }
+@keyframes riseIn {
+    from { opacity: 0; transform: translateY(8px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes completionGlow {
+    from { box-shadow: 0 0 0 rgba(99, 167, 255, 0.08); }
+    to { box-shadow: 0 18px 42px rgba(0, 0, 0, 0.2); }
+}
+
+@media (max-width: 760px) {
+    .app-card { min-height: auto; }
     .controls { grid-template-columns: 1fr; }
     .actions { flex-direction: column; }
     button { width: 100%; }
-    .prompt-box { min-height: 140px; font-size: 22px; }
+    .prompt-box { min-height: 7.5rem; font-size: clamp(1rem, 3vw, 1.3rem); }
     .presentation-view { padding: 18px; }
     .presentation-inner { gap: 18px; }
-    .presentation-prompt { font-size: 24px; }
-    .ring-wrap { width: 180px; height: 180px; }
-    .timer { font-size: 38px; }
-    .step { border-radius: 18px; }
+    .presentation-prompt { font-size: clamp(1.25rem, 3.5vw, 1.8rem); }
+    .ring-wrap { width: min(200px, 62vw); }
+}
+
+@media (max-width: 480px) {
+    body { padding: 12px; overflow: auto; }
+    .app-card { border-radius: 20px; }
+    .panel { gap: 0.9rem; }
+    .actions { gap: 10px; }
+    .prompt-box { min-height: 6.2rem; border-radius: 18px; }
+    .step { border-radius: 16px; }
+    .presentation-view { padding: 14px; }
+    .guide { width: 100%; }
+    .ring-wrap { width: min(180px, 72vw); }
+    .timer { font-size: 2rem; }
 }
 </style>
 </head>
@@ -464,12 +592,14 @@ body.presentation-mode .presentation-view {
         <div class="actions">
           <button class="generate-btn" onclick="generatePrompt()">Generate Challenge</button>
           <button class="surprise-btn" onclick="surpriseMe()">Surprise Me</button>
-          <button class="start-btn" onclick="startTimer()">Start 1-Minute Round</button>
         </div>
         <div class="challenge-block">
           <p class="challenge-label">Current Challenge</p>
           <div class="prompt-box" id="prompt">
             <div class="placeholder">YOUR CHALLENGE</div>
+          </div>
+          <div class="challenge-actions">
+            <button class="start-btn is-hidden" id="startBtn" onclick="startTimer()">Start 1-Minute Round</button>
           </div>
         </div>
       </div>
@@ -501,13 +631,80 @@ body.presentation-mode .presentation-view {
           <div class="step" id="example"><span>○ Example</span></div>
           <div class="step" id="conclusion"><span>○ Conclusion</span></div>
         </div>
+        <div class="completion-card" id="completionCard" aria-live="polite">
+          <div class="completion-title">🎉 Time is up!</div>
+          <div class="completion-copy">Great job practicing your impromptu speech.</div>
+        </div>
       </div>
     </section>
   </div>
 </div>
+<audio id="generateSound" src="sounds/generate.mp3" preload="auto"></audio>
+<audio id="startSound" src="sounds/start.mp3" preload="auto"></audio>
+<audio id="finishSound" src="sounds/finish.mp3" preload="auto"></audio>
 <script>
 const WORKER_URL = "https://cool-sound-1db8.amberprincessrosana.workers.dev/";
 const MODEL = "poolside/laguna-s-2.1:free";
+const soundFiles = {
+    generate: 'sounds/generate.mp3',
+    start: 'sounds/start.mp3',
+    finish: 'sounds/finish.mp3'
+};
+const soundPlayers = {};
+let soundLock = false;
+
+// Timer state is reset cleanly whenever the presentation view is closed or a new round starts.
+let totalTime = 60;
+let timeLeft = 60;
+let timerInterval = null;
+let timerActive = false;
+let timerResetToken = 0;
+
+function playSound(type) {
+    const path = soundFiles[type];
+    if (!path || soundLock) return;
+
+    try {
+        let audio = soundPlayers[type];
+        if (!audio) {
+            audio = new Audio(path);
+            audio.preload = 'auto';
+            soundPlayers[type] = audio;
+        }
+
+        soundLock = true;
+        audio.currentTime = 0;
+        audio.play().catch(() => {
+            console.log('Sound unavailable');
+        });
+
+        const releaseLock = () => {
+            soundLock = false;
+        };
+
+        audio.addEventListener('ended', releaseLock, { once: true });
+        audio.addEventListener('error', releaseLock, { once: true });
+        setTimeout(releaseLock, 220);
+    } catch (err) {
+        console.log('Sound unavailable');
+    }
+}
+
+function setStartButtonVisibility(visible) {
+    const button = document.getElementById('startBtn');
+    if (!button) return;
+    button.classList.toggle('is-visible', visible);
+    button.classList.toggle('is-hidden', !visible);
+    button.setAttribute('aria-hidden', visible ? 'false' : 'true');
+}
+
+function animatePromptBox() {
+    const promptBox = document.getElementById('prompt');
+    if (!promptBox) return;
+    promptBox.classList.remove('is-animating');
+    void promptBox.offsetWidth;
+    promptBox.classList.add('is-animating');
+}
 
 async function generatePrompt(){
     const type = document.getElementById("type").value;
@@ -518,23 +715,31 @@ async function generatePrompt(){
     console.log("Category:", category);
 
     promptBox.innerHTML = `<div class="placeholder loading">✨ AI is thinking...</div>`;
+    setStartButtonVisibility(false);
+    hideCompletionCard();
+    stopTimer();
     syncChallengeToPresentation();
+    playSound('generate');
 
     try {
         const result = await generateAI(type, category);
 
         if (typeof result === 'string' && result.trim().length > 0) {
             promptBox.textContent = result.trim();
+            animatePromptBox();
             syncChallengeToPresentation();
+            setStartButtonVisibility(true);
         } else {
             console.error('AI returned empty result:', result);
             promptBox.innerHTML = `<div class="placeholder">❌ Failed to generate prompt. Please try again.</div>`;
             syncChallengeToPresentation();
+            setStartButtonVisibility(false);
         }
     } catch (err) {
         console.error('generatePrompt error:', err);
         promptBox.innerHTML = `<div class="placeholder">❌ Failed to generate prompt. Please try again.</div>`;
         syncChallengeToPresentation();
+        setStartButtonVisibility(false);
     }
 }
 
@@ -621,6 +826,7 @@ function enterPresentationMode() {
 
 function exitPresentationMode() {
     document.body.classList.remove('presentation-mode');
+    stopTimer();
 }
 
 function surpriseMe() {
@@ -643,41 +849,75 @@ document.addEventListener('keydown', function (e) {
     }
 });
 
-let totalTime = 60;
-let timeLeft = 60;
-let timerInterval = null;
-
-function startTimer() {
+function stopTimer() {
     if (timerInterval) {
         clearInterval(timerInterval);
+        timerInterval = null;
     }
 
-    enterPresentationMode();
+    timerActive = false;
+    timerResetToken += 1;
     timeLeft = totalTime;
     updateTimer();
     clearSteps();
+    hideCompletionCard();
+}
+
+function startTimer() {
+    const promptBox = document.getElementById('prompt');
+    const challengeText = promptBox?.textContent?.trim() || '';
+
+    if (!challengeText || challengeText.includes('YOUR CHALLENGE')) {
+        return;
+    }
+
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+
+    timerResetToken += 1;
+    const thisRun = timerResetToken;
+    timerActive = true;
+    hideCompletionCard();
+    timeLeft = totalTime;
+    updateTimer();
+    clearSteps();
+    enterPresentationMode();
+    playSound('start');
 
     timerInterval = setInterval(() => {
+        if (!timerActive || thisRun !== timerResetToken) {
+            return;
+        }
+
         timeLeft--;
         updateTimer();
         updateGuide();
 
         if (timeLeft <= 0) {
             clearInterval(timerInterval);
-            timerFinished();
+            timerInterval = null;
+            if (thisRun === timerResetToken) {
+                timerFinished();
+            }
         }
     }, 1000);
 }
 
 function updateTimer() {
     const timer = document.getElementById('timer');
+    if (!timer) return;
+
     let minutes = Math.floor(timeLeft / 60);
     let seconds = timeLeft % 60;
 
     timer.innerHTML = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
     const progress = document.getElementById('progress');
-    progress.style.width = (timeLeft / totalTime * 100) + '%';
+    if (progress) {
+        progress.style.width = (timeLeft / totalTime * 100) + '%';
+    }
     syncRingProgress();
 }
 
@@ -710,7 +950,10 @@ function updateGuide() {
 }
 
 function activateStep(id) {
-    document.getElementById(id).classList.add('active');
+    const step = document.getElementById(id);
+    if (step) {
+        step.classList.add('active');
+    }
 }
 
 function clearSteps() {
@@ -718,14 +961,37 @@ function clearSteps() {
     steps.forEach(step => step.classList.remove('active'));
 }
 
+function showCompletionCard() {
+    const card = document.getElementById('completionCard');
+    if (card) {
+        card.classList.add('is-visible');
+    }
+}
+
+function hideCompletionCard() {
+    const card = document.getElementById('completionCard');
+    if (card) {
+        card.classList.remove('is-visible');
+    }
+}
+
 function timerFinished() {
-    const timer = document.getElementById('timer');
-    timer.innerHTML = '00:00';
+    if (!timerActive) {
+        return;
+    }
+
+    clearInterval(timerInterval);
+    timerInterval = null;
+    timerActive = false;
+    timeLeft = 0;
+    updateTimer();
     clearSteps();
-    document.getElementById('conclusion').classList.add('active');
-    setTimeout(() => {
-        alert('🎉 Time is up! Great job practicing!');
-    }, 300);
+    const conclusion = document.getElementById('conclusion');
+    if (conclusion) {
+        conclusion.classList.add('active');
+    }
+    showCompletionCard();
+    playSound('finish');
 }
 </script>
 </body>
