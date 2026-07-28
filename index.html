@@ -1,1652 +1,1754 @@
-﻿    <!DOCTYPE html>
-    <html lang="en">
-    <head>
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Think Quick!</title>
     <style>
-    :root {
-        color-scheme: dark;
-        --bg: #060712;
-        --glass: rgba(10, 14, 28, 0.78);
-        --glass-strong: rgba(14, 19, 35, 0.9);
-        --border: rgba(255, 255, 255, 0.16);
-        --text: #F5F7FF;
-        --muted: #AAB3D4;
-        --blue: #4F72B8;
-        --purple: #5D4CB5;
-        --cyan: #8B51B8;
-        --magenta: #B7568A;
-        --pink: #D37CC0;
-        --lavender: #B37ABF;
-    }
-
-    * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-        font-family: "Inter", "Segoe UI", sans-serif;
-    }
-
-    body {
-        min-height: 100vh;
-        background: var(--bg);
-        color: var(--text);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: clamp(12px, 2vw, 24px);
-        overflow: hidden;
-        position: relative;
-    }
-
-    body::before,
-    body::after {
-        content: "";
-        position: fixed;
-        inset: -24%;
-        z-index: 0;
-        pointer-events: none;
-        filter: blur(260px);
-        opacity: 0.46;
-        animation: auroraDrift 34s ease-in-out infinite alternate;
-    }
-
-    body::before {
-        background: radial-gradient(ellipse at 18% 20%, rgba(101, 151, 255, 0.34) 0%, rgba(89, 122, 255, 0.12) 24%, transparent 56%),
-                    radial-gradient(ellipse at 82% 18%, rgba(139, 90, 255, 0.28) 0%, rgba(92, 71, 194, 0.1) 24%, transparent 54%),
-                    radial-gradient(ellipse at 58% 82%, rgba(223, 130, 255, 0.26) 0%, rgba(187, 94, 220, 0.09) 24%, transparent 48%),
-                    radial-gradient(ellipse at 42% 62%, rgba(255, 126, 174, 0.24) 0%, rgba(210, 88, 143, 0.08) 24%, transparent 50%);
-    }
-
-    body::after {
-        animation-duration: 40s;
-        background: radial-gradient(ellipse at 78% 76%, rgba(89, 184, 255, 0.26) 0%, rgba(55, 111, 212, 0.08) 22%, transparent 46%),
-                    radial-gradient(ellipse at 24% 78%, rgba(170, 99, 255, 0.24) 0%, rgba(121, 72, 196, 0.08) 24%, transparent 48%),
-                    radial-gradient(ellipse at 54% 24%, rgba(255, 153, 208, 0.22) 0%, rgba(230, 117, 184, 0.07) 24%, transparent 46%),
-                    radial-gradient(ellipse at 64% 46%, rgba(104, 214, 255, 0.2) 0%, rgba(70, 140, 196, 0.06) 22%, transparent 44%);
-    }
-
-    @keyframes auroraDrift {
-        from { transform: translate3d(-3%, -2%, 0) scale(1); }
-        to { transform: translate3d(3%, 2%, 0) scale(1.04); }
-    }
-
-    .app-shell {
-        position: relative;
-        z-index: 1;
-        width: min(960px, 100%);
-    }
-
-    .app-card {
-        position: relative;
-        width: 100%;
-        min-height: min(78vh, 700px);
-        border-radius: clamp(22px, 3vw, 32px);
-        background: var(--glass);
-        backdrop-filter: blur(26px);
-        border: 1px solid var(--border);
-        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.32), 0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.06);
-        overflow: hidden;
-        padding: clamp(20px, 2.6vw, 36px);
-    }
-
-    .setup-view,
-    .presentation-view {
-        transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-    }
-
-    .setup-view {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        gap: clamp(16px, 2vw, 24px);
-    }
-
-    .brand {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .brand-badge {
-        width: clamp(48px, 5vw, 58px);
-        height: clamp(48px, 5vw, 58px);
-        border-radius: 50%;
-        display: grid;
-        place-items: center;
-        background: linear-gradient(135deg, rgba(101, 151, 255, 0.3), rgba(223, 130, 255, 0.24));
-        border: 1px solid rgba(255, 255, 255, 0.14);
-        font-size: 24px;
-        box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
-    }
-
-    .brand h1 {
-        font-family: "Cormorant Garamond", Georgia, serif;
-        font-size: clamp(1.9rem, 3.4vw, 2.7rem);
-        letter-spacing: 0.02em;
-        color: var(--text);
-    }
-
-    .brand p {
-        color: var(--muted);
-        font-size: 0.82rem;
-        letter-spacing: 0.24em;
-        text-transform: uppercase;
-    }
-
-    .panel {
-        width: min(100%, 640px);
-        display: flex;
-        flex-direction: column;
-        gap: clamp(14px, 1.8vw, 20px);
-    }
-
-    .controls {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: clamp(12px, 1.4vw, 16px);
-    }
-
-    .field {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        text-align: left;
-    }
-
-    .field label {
-        color: var(--muted);
-        font-size: 0.76rem;
-        text-transform: uppercase;
-        letter-spacing: 0.18em;
-    }
-
-    select {
-        padding: 0.9rem 1rem;
-        border-radius: 999px;
-        border: 1px solid var(--border);
-        background: rgba(13, 15, 27, 0.88);
-        color: var(--text);
-        font-size: 0.95rem;
-        outline: none;
-        appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23AAB3D4' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 1rem center;
-        background-size: 0.9rem;
-        padding-right: 2.6rem;
-        box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
-    }
-
-    select option {
-        background: #0f1122;
-        color: var(--text);
-    }
-
-    select:focus {
-        outline: none;
-        border-color: rgba(79, 114, 184, 0.28);
-        box-shadow: 0 0 0 4px rgba(79, 114, 184, 0.1);
-    }
-
-    .type-toggle-group {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 8px;
-        padding: 6px;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    .type-toggle {
-        width: 100%;
-        min-height: 44px;
-        border-radius: 999px;
-        border: 1px solid transparent;
-        background: transparent;
-        color: var(--muted);
-        font-weight: 600;
-        box-shadow: none;
-        backdrop-filter: none;
-    }
-
-    .type-toggle.is-active {
-        background: linear-gradient(135deg, rgba(79, 114, 184, 0.34), rgba(93, 76, 181, 0.28));
-        color: #fff;
-        border-color: rgba(255, 255, 255, 0.16);
-        box-shadow: 0 8px 20px rgba(79, 114, 184, 0.16);
-    }
-
-    .actions {
-        display: flex;
-        gap: 12px;
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-
-    .challenge-actions {
-        display: flex;
-        justify-content: center;
-        margin-top: 0.85rem;
-    }
-
-    button {
-        cursor: pointer;
-        border: none;
-        border-radius: 999px;
-        padding: 0.9rem 1.2rem;
-        font-size: 0.95rem;
-        font-weight: 600;
-        transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
-        font-family: inherit;
-        color: var(--text);
-        background: var(--glass);
-        border: 1px solid var(--border);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.16);
-        backdrop-filter: blur(18px);
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 16px 34px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(255,255,255,0.04);
-    }
-
-    .generate-btn {
-        background: linear-gradient(135deg, rgba(101, 151, 255, 0.88), rgba(223, 130, 255, 0.76));
-        color: #fff;
-        box-shadow: 0 16px 36px rgba(79, 114, 184, 0.16);
-        font-weight: 700;
-    }
-
-    .generate-btn:hover {
-        box-shadow: 0 20px 42px rgba(79, 114, 184, 0.2);
-    }
-
-    .start-btn {
-        display: none;
-        opacity: 0;
-        transform: translateY(10px) scale(0.97);
-        background: linear-gradient(135deg, rgba(255,255,255,0.11), rgba(255,255,255,0.04));
-        border-color: rgba(255,255,255,0.14);
-        box-shadow: 0 14px 32px rgba(0, 0, 0, 0.16);
-    }
-
-    .start-btn.is-visible {
-        display: inline-flex;
-        opacity: 1;
-        transform: translateY(0) scale(1);
-        animation: riseIn 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-    }
-
-    .surprise-btn {
-        background: rgba(255, 255, 255, 0.04);
-        color: var(--text);
-    }
-
-    .close-btn {
-        background: rgba(255, 255, 255, 0.05);
-        color: var(--text);
-        border: 1px solid rgba(255,255,255,0.1);
-    }
-
-    .challenge-block {
-        width: 100%;
-        padding-top: 6px;
-    }
-
-    .challenge-label {
-        color: var(--muted);
-        font-size: 0.72rem;
-        letter-spacing: 0.28em;
-        text-transform: uppercase;
-        margin-bottom: 0.85rem;
-    }
-
-    .prompt-box {
-        margin-top: 0;
-        padding: clamp(1rem, 2vw, 1.3rem);
-        min-height: clamp(8rem, 12vw, 10rem);
-        border-radius: 24px;
-        background: rgba(255, 255, 255, 0.04);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        font-size: clamp(1.1rem, 2.2vw, 1.75rem);
-        line-height: 1.35;
-        color: var(--text);
-        font-family: "Cormorant Garamond", Georgia, serif;
-        font-weight: 600;
-        letter-spacing: 0.01em;
-        border: 1px solid rgba(255,255,255,0.06);
-        box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
-        backdrop-filter: blur(16px);
-    }
-
-    .prompt-box.is-animating {
-        animation: challengeReveal 0.45s cubic-bezier(0.22, 1, 0.36, 1);
-    }
-
-    .placeholder {
-        color: var(--muted);
-        font-family: "Inter", "Segoe UI", sans-serif;
-        font-size: 0.78rem;
-        text-transform: uppercase;
-        letter-spacing: 0.34em;
-    }
-
-    .presentation-view {
-        position: absolute;
-        inset: 0;
-        padding: clamp(16px, 2vw, 24px);
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: center;
-        opacity: 0;
-        pointer-events: none;
-        transform: translateY(12px) scale(0.98);
-        overflow-x: hidden;
-        overflow-y: auto;
-    }
-
-    .presentation-view::-webkit-scrollbar {
-        display: none;
-    }
-
-    body.presentation-mode .setup-view {
-        opacity: 0;
-        pointer-events: none;
-        transform: translateY(-8px);
-    }
-
-    body.presentation-mode .presentation-view {
-        opacity: 1;
-        pointer-events: auto;
-        transform: translateY(0) scale(1);
-    }
-
-    .close-btn {
-        position: absolute;
-        top: clamp(14px, 2vw, 22px);
-        right: clamp(14px, 2vw, 22px);
-        z-index: 3;
-    }
-
-    .presentation-inner {
-        width: 100%;
-        max-width: 760px;
-        display: flex;
-        flex-direction: column;
-        gap: clamp(16px, 2.2vw, 24px);
-        align-items: center;
-        text-align: center;
-        justify-content: center;
-        min-height: 100%;
-        padding-block: clamp(12px, 2vw, 20px);
-    }
-
-    .presentation-challenge {
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .presentation-prompt {
-        font-family: "Cormorant Garamond", Georgia, serif;
-        font-size: clamp(1rem, 2.1vw, 2.1rem);
-        line-height: 1.3;
-        color: var(--text);
-        max-width: min(100%, 640px);
-        width: 100%;
-        overflow-wrap: anywhere;
-        word-break: break-word;
-        hyphens: auto;
-    }
-
-    .timer-panel {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-    }
-
-    .ring-wrap {
-        position: relative;
-        width: min(240px, 58vw);
-        aspect-ratio: 1;
-        display: grid;
-        place-items: center;
-    }
-
-    .ring-wrap svg {
-        width: 100%;
-        height: 100%;
-        transform: rotate(-90deg);
-    }
-
-    .ring-track,
-    .ring-progress {
-        fill: none;
-        stroke-width: 10;
-    }
-
-    .ring-track {
-        stroke: rgba(255,255,255,0.08);
-    }
-
-    .ring-progress {
-        stroke: #76C9FF;
-        stroke-linecap: round;
-        stroke-dasharray: 339;
-        stroke-dashoffset: 339;
-        transition: stroke-dashoffset 0.9s linear;
-        filter: drop-shadow(0 0 10px rgba(79, 114, 184, 0.12));
-    }
-
-    .timer-shell {
-        position: absolute;
-        inset: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-    }
-
-    .timer {
-        font-size: clamp(2.1rem, 4.5vw, 3.2rem);
-        font-weight: 700;
-        color: var(--text);
-        font-family: "Inter", "Segoe UI", sans-serif;
-    }
-
-    .timer-caption {
-        color: var(--muted);
-        font-size: 0.76rem;
-        text-transform: uppercase;
-        letter-spacing: 0.28em;
-    }
-
-    .guide {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        width: min(100%, 560px);
-        flex-wrap: nowrap;
-        flex-shrink: 1;
-        transition: opacity 0.3s ease, transform 0.3s ease, max-height 0.3s ease;
-    }
-
-    .step {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        padding: 0.7rem 0.8rem;
-        border-radius: 999px;
-        background: rgba(255,255,255,0.04);
-        border: 1px solid rgba(255,255,255,0.08);
-        color: var(--text);
-        text-align: center;
-        font-size: clamp(0.78rem, 1vw, 0.92rem);
-        transition: all 0.25s ease;
-        backdrop-filter: blur(12px);
-        flex: 1 1 0;
-        min-width: 0;
-    }
-
-    .step-indicator {
-        width: 0.86rem;
-        height: 0.86rem;
-        border-radius: 50%;
-        border: 1.5px solid rgba(255,255,255,0.32);
-        display: inline-block;
-        flex-shrink: 0;
-        transition: all 0.25s ease;
-    }
-
-    .step-label {
-        font-weight: 600;
-        color: var(--text);
-    }
-
-    .active {
-        background: rgba(79, 114, 184, 0.16);
-        border-color: rgba(79, 114, 184, 0.28);
-        transform: translateX(4px);
-        box-shadow: inset 0 0 0 1px rgba(79, 114, 184, 0.12);
-    }
-
-    .active .step-indicator {
-        background: linear-gradient(135deg, var(--blue), var(--magenta));
-        border-color: transparent;
-        transform: scale(1.08);
-        box-shadow: 0 0 0 4px rgba(99, 167, 255, 0.12);
-    }
-
-    .completion-card {
-        width: min(100%, 520px);
-        padding: 1rem 1.1rem;
-        border-radius: 20px;
-        background: linear-gradient(135deg, rgba(79, 114, 184, 0.12), rgba(93, 76, 181, 0.09));
-        border: 1px solid rgba(255,255,255,0.1);
-        box-shadow: 0 16px 36px rgba(0, 0, 0, 0.2);
-        backdrop-filter: blur(16px);
-        display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
-        opacity: 0;
-        transform: translateY(8px);
-        pointer-events: none;
-        max-height: 0;
-        overflow: hidden;
-        transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-    }
-
-    .completion-card.is-visible {
-        opacity: 1;
-        transform: translateY(0);
-        max-height: 200px;
-        animation: completionGlow 0.5s ease;
-    }
-
-    .completion-card.is-visible ~ .guide {
-        opacity: 0;
-        transform: translateY(8px);
-        max-height: 0;
-        overflow: hidden;
-        pointer-events: none;
-    }
-
-    .completion-title {
-        font-size: 1rem;
-        font-weight: 700;
-        color: #fff;
-    }
-
-    .completion-copy {
-        color: var(--muted);
-        font-size: 0.95rem;
-        line-height: 1.45;
-    }
-
-    .progress {
-        position: absolute;
-        width: 0%;
-        height: 0;
-        opacity: 0;
-        pointer-events: none;
-    }
-
-    .footer {
-        text-align: center;
-        color: var(--muted);
-        font-size: 0.8rem;
-        margin-top: 12px;
-    }
-
-    @keyframes challengeReveal {
-        from { opacity: 0; transform: translateY(8px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes riseIn {
-        from { opacity: 0; transform: translateY(8px) scale(0.97); }
-        to { opacity: 1; transform: translateY(0) scale(1); }
-    }
-
-    @keyframes completionGlow {
-        from { box-shadow: 0 0 0 rgba(79, 114, 184, 0.04); }
-        to { box-shadow: 0 16px 36px rgba(0, 0, 0, 0.2); }
-    }
-
-    @media (max-width: 760px) {
-        .app-card { min-height: auto; }
-        .controls { grid-template-columns: 1fr; }
-        .actions { flex-direction: column; }
-        button { width: 100%; }
-        .prompt-box { min-height: 7.5rem; font-size: clamp(1rem, 3vw, 1.3rem); }
-        .presentation-view { padding: 18px; }
-        .presentation-inner { gap: 18px; }
-        .presentation-prompt { font-size: clamp(1.25rem, 3.5vw, 1.8rem); }
-        .ring-wrap { width: min(200px, 62vw); }
-    }
-
-    @media (max-width: 480px) {
-        body { padding: 12px; overflow: auto; }
-        .app-card { border-radius: 20px; }
-        .panel { gap: 0.9rem; }
-        .actions { gap: 10px; }
-        .prompt-box { min-height: 6.2rem; border-radius: 18px; }
-        .step { border-radius: 16px; }
-        .presentation-view { padding: 14px; }
-        .guide { width: 100%; }
-        .ring-wrap { width: min(180px, 72vw); }
-        .timer { font-size: 2rem; }
-    }
+        :root {
+            color-scheme: dark;
+            --bg: #060712;
+            --glass: rgba(10, 14, 28, 0.78);
+            --glass-strong: rgba(14, 19, 35, 0.9);
+            --border: rgba(255, 255, 255, 0.16);
+            --text: #F5F7FF;
+            --muted: #AAB3D4;
+            --blue: #4F72B8;
+            --purple: #5D4CB5;
+            --cyan: #8B51B8;
+            --magenta: #B7568A;
+            --pink: #D37CC0;
+            --lavender: #B37ABF;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Inter", "Segoe UI", sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: clamp(12px, 2vw, 24px);
+            overflow: hidden;
+            position: relative;
+        }
+
+        body::before,
+        body::after {
+            content: "";
+            position: fixed;
+            inset: -24%;
+            z-index: 0;
+            pointer-events: none;
+            filter: blur(260px);
+            opacity: 0.46;
+            animation: auroraDrift 34s ease-in-out infinite alternate;
+        }
+
+        body::before {
+            background: radial-gradient(ellipse at 18% 20%, rgba(101, 151, 255, 0.34) 0%, rgba(89, 122, 255, 0.12) 24%, transparent 56%),
+                radial-gradient(ellipse at 82% 18%, rgba(139, 90, 255, 0.28) 0%, rgba(92, 71, 194, 0.1) 24%, transparent 54%),
+                radial-gradient(ellipse at 58% 82%, rgba(223, 130, 255, 0.26) 0%, rgba(187, 94, 220, 0.09) 24%, transparent 48%),
+                radial-gradient(ellipse at 42% 62%, rgba(255, 126, 174, 0.24) 0%, rgba(210, 88, 143, 0.08) 24%, transparent 50%);
+        }
+
+        body::after {
+            animation-duration: 40s;
+            background: radial-gradient(ellipse at 78% 76%, rgba(89, 184, 255, 0.26) 0%, rgba(55, 111, 212, 0.08) 22%, transparent 46%),
+                radial-gradient(ellipse at 24% 78%, rgba(170, 99, 255, 0.24) 0%, rgba(121, 72, 196, 0.08) 24%, transparent 48%),
+                radial-gradient(ellipse at 54% 24%, rgba(255, 153, 208, 0.22) 0%, rgba(230, 117, 184, 0.07) 24%, transparent 46%),
+                radial-gradient(ellipse at 64% 46%, rgba(104, 214, 255, 0.2) 0%, rgba(70, 140, 196, 0.06) 22%, transparent 44%);
+        }
+
+        @keyframes auroraDrift {
+            from {
+                transform: translate3d(-3%, -2%, 0) scale(1);
+            }
+
+            to {
+                transform: translate3d(3%, 2%, 0) scale(1.04);
+            }
+        }
+
+        .app-shell {
+            position: relative;
+            z-index: 1;
+            width: min(960px, 100%);
+        }
+
+        .app-card {
+            position: relative;
+            width: 100%;
+            min-height: min(78vh, 700px);
+            border-radius: clamp(22px, 3vw, 32px);
+            background: var(--glass);
+            backdrop-filter: blur(26px);
+            border: 1px solid var(--border);
+            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.32), 0 0 0 1px rgba(255, 255, 255, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+            overflow: hidden;
+            padding: clamp(20px, 2.6vw, 36px);
+        }
+
+        .setup-view,
+        .presentation-view {
+            transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .setup-view {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: clamp(16px, 2vw, 24px);
+        }
+
+        .brand {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .brand-badge {
+            width: clamp(48px, 5vw, 58px);
+            height: clamp(48px, 5vw, 58px);
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, rgba(101, 151, 255, 0.3), rgba(223, 130, 255, 0.24));
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            font-size: 24px;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+
+        .brand h1 {
+            font-family: "Cormorant Garamond", Georgia, serif;
+            font-size: clamp(1.9rem, 3.4vw, 2.7rem);
+            letter-spacing: 0.02em;
+            color: var(--text);
+        }
+
+        .brand p {
+            color: var(--muted);
+            font-size: 0.82rem;
+            letter-spacing: 0.24em;
+            text-transform: uppercase;
+        }
+
+        .panel {
+            width: min(100%, 640px);
+            display: flex;
+            flex-direction: column;
+            gap: clamp(14px, 1.8vw, 20px);
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: clamp(12px, 1.4vw, 16px);
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            text-align: left;
+        }
+
+        .field label {
+            color: var(--muted);
+            font-size: 0.76rem;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+        }
+
+        select {
+            padding: 0.9rem 1rem;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: rgba(13, 15, 27, 0.88);
+            color: var(--text);
+            font-size: 0.95rem;
+            outline: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23AAB3D4' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 0.9rem;
+            padding-right: 2.6rem;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        select option {
+            background: #0f1122;
+            color: var(--text);
+        }
+
+        select:focus {
+            outline: none;
+            border-color: rgba(79, 114, 184, 0.28);
+            box-shadow: 0 0 0 4px rgba(79, 114, 184, 0.1);
+        }
+
+        .type-toggle-group {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+            padding: 6px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .type-toggle {
+            width: 100%;
+            min-height: 44px;
+            border-radius: 999px;
+            border: 1px solid transparent;
+            background: transparent;
+            color: var(--muted);
+            font-weight: 600;
+            box-shadow: none;
+            backdrop-filter: none;
+        }
+
+        .type-toggle.is-active {
+            background: linear-gradient(135deg, rgba(79, 114, 184, 0.34), rgba(93, 76, 181, 0.28));
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.16);
+            box-shadow: 0 8px 20px rgba(79, 114, 184, 0.16);
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .challenge-actions {
+            display: flex;
+            justify-content: center;
+            margin-top: 0.85rem;
+        }
+
+        button {
+            cursor: pointer;
+            border: none;
+            border-radius: 999px;
+            padding: 0.9rem 1.2rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+            font-family: inherit;
+            color: var(--text);
+            background: var(--glass);
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.16);
+            backdrop-filter: blur(18px);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 16px 34px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(255, 255, 255, 0.04);
+        }
+
+        .generate-btn {
+            background: linear-gradient(135deg, rgba(101, 151, 255, 0.88), rgba(223, 130, 255, 0.76));
+            color: #fff;
+            box-shadow: 0 16px 36px rgba(79, 114, 184, 0.16);
+            font-weight: 700;
+        }
+
+        .generate-btn:hover {
+            box-shadow: 0 20px 42px rgba(79, 114, 184, 0.2);
+        }
+
+        .start-btn {
+            display: none;
+            opacity: 0;
+            transform: translateY(10px) scale(0.97);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.04));
+            border-color: rgba(255, 255, 255, 0.14);
+            box-shadow: 0 14px 32px rgba(0, 0, 0, 0.16);
+        }
+
+        .start-btn.is-visible {
+            display: inline-flex;
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            animation: riseIn 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .surprise-btn {
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text);
+        }
+
+        .close-btn {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .challenge-block {
+            width: 100%;
+            padding-top: 6px;
+        }
+
+        .challenge-label {
+            color: var(--muted);
+            font-size: 0.72rem;
+            letter-spacing: 0.28em;
+            text-transform: uppercase;
+            margin-bottom: 0.85rem;
+        }
+
+        .prompt-box {
+            margin-top: 0;
+            padding: clamp(1rem, 2vw, 1.3rem);
+            min-height: clamp(8rem, 12vw, 10rem);
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.04);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: clamp(1.1rem, 2.2vw, 1.75rem);
+            line-height: 1.35;
+            color: var(--text);
+            font-family: "Cormorant Garamond", Georgia, serif;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+        }
+
+        .prompt-box.is-animating {
+            animation: challengeReveal 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .placeholder {
+            color: var(--muted);
+            font-family: "Inter", "Segoe UI", sans-serif;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.34em;
+        }
+
+        .presentation-view {
+            position: absolute;
+            inset: 0;
+            padding: clamp(16px, 2vw, 24px);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(12px) scale(0.98);
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        .presentation-view::-webkit-scrollbar {
+            display: none;
+        }
+
+        body.presentation-mode .setup-view {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(-8px);
+        }
+
+        body.presentation-mode .presentation-view {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0) scale(1);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: clamp(14px, 2vw, 22px);
+            right: clamp(14px, 2vw, 22px);
+            z-index: 3;
+        }
+
+        .presentation-inner {
+            width: 100%;
+            max-width: 760px;
+            display: flex;
+            flex-direction: column;
+            gap: clamp(16px, 2.2vw, 24px);
+            align-items: center;
+            text-align: center;
+            justify-content: center;
+            min-height: 100%;
+            padding-block: clamp(12px, 2vw, 20px);
+        }
+
+        .presentation-challenge {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .presentation-prompt {
+            font-family: "Cormorant Garamond", Georgia, serif;
+            font-size: clamp(1rem, 2.1vw, 2.1rem);
+            line-height: 1.3;
+            color: var(--text);
+            max-width: min(100%, 640px);
+            width: 100%;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            hyphens: auto;
+        }
+
+        .timer-panel {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+
+        .ring-wrap {
+            position: relative;
+            width: min(240px, 58vw);
+            aspect-ratio: 1;
+            display: grid;
+            place-items: center;
+        }
+
+        .ring-wrap svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .ring-track,
+        .ring-progress {
+            fill: none;
+            stroke-width: 10;
+        }
+
+        .ring-track {
+            stroke: rgba(255, 255, 255, 0.08);
+        }
+
+        .ring-progress {
+            stroke: #76C9FF;
+            stroke-linecap: round;
+            stroke-dasharray: 339;
+            stroke-dashoffset: 339;
+            transition: stroke-dashoffset 0.9s linear;
+            filter: drop-shadow(0 0 10px rgba(79, 114, 184, 0.12));
+        }
+
+        .timer-shell {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .timer {
+            font-size: clamp(2.1rem, 4.5vw, 3.2rem);
+            font-weight: 700;
+            color: var(--text);
+            font-family: "Inter", "Segoe UI", sans-serif;
+        }
+
+        .timer-caption {
+            color: var(--muted);
+            font-size: 0.76rem;
+            text-transform: uppercase;
+            letter-spacing: 0.28em;
+        }
+
+        .guide {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: min(100%, 560px);
+            flex-wrap: nowrap;
+            flex-shrink: 1;
+            transition: opacity 0.3s ease, transform 0.3s ease, max-height 0.3s ease;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.7rem 0.8rem;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text);
+            text-align: center;
+            font-size: clamp(0.78rem, 1vw, 0.92rem);
+            transition: all 0.25s ease;
+            backdrop-filter: blur(12px);
+            flex: 1 1 0;
+            min-width: 0;
+        }
+
+        .step-indicator {
+            width: 0.86rem;
+            height: 0.86rem;
+            border-radius: 50%;
+            border: 1.5px solid rgba(255, 255, 255, 0.32);
+            display: inline-block;
+            flex-shrink: 0;
+            transition: all 0.25s ease;
+        }
+
+        .step-label {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .active {
+            background: rgba(79, 114, 184, 0.16);
+            border-color: rgba(79, 114, 184, 0.28);
+            transform: translateX(4px);
+            box-shadow: inset 0 0 0 1px rgba(79, 114, 184, 0.12);
+        }
+
+        .active .step-indicator {
+            background: linear-gradient(135deg, var(--blue), var(--magenta));
+            border-color: transparent;
+            transform: scale(1.08);
+            box-shadow: 0 0 0 4px rgba(99, 167, 255, 0.12);
+        }
+
+        .completion-card {
+            width: min(100%, 520px);
+            padding: 1rem 1.1rem;
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(79, 114, 184, 0.12), rgba(93, 76, 181, 0.09));
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(16px);
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            opacity: 0;
+            transform: translateY(8px);
+            pointer-events: none;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .completion-card.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+            max-height: 200px;
+            animation: completionGlow 0.5s ease;
+        }
+
+        .completion-card.is-visible~.guide {
+            opacity: 0;
+            transform: translateY(8px);
+            max-height: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .completion-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .completion-copy {
+            color: var(--muted);
+            font-size: 0.95rem;
+            line-height: 1.45;
+        }
+
+        .progress {
+            position: absolute;
+            width: 0%;
+            height: 0;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .footer {
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.8rem;
+            margin-top: 12px;
+        }
+
+        @keyframes challengeReveal {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes riseIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px) scale(0.97);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes completionGlow {
+            from {
+                box-shadow: 0 0 0 rgba(79, 114, 184, 0.04);
+            }
+
+            to {
+                box-shadow: 0 16px 36px rgba(0, 0, 0, 0.2);
+            }
+        }
+
+        @media (max-width: 760px) {
+            .app-card {
+                min-height: auto;
+            }
+
+            .controls {
+                grid-template-columns: 1fr;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+
+            .prompt-box {
+                min-height: 7.5rem;
+                font-size: clamp(1rem, 3vw, 1.3rem);
+            }
+
+            .presentation-view {
+                padding: 18px;
+            }
+
+            .presentation-inner {
+                gap: 18px;
+            }
+
+            .presentation-prompt {
+                font-size: clamp(1.25rem, 3.5vw, 1.8rem);
+            }
+
+            .ring-wrap {
+                width: min(200px, 62vw);
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 12px;
+                overflow: auto;
+            }
+
+            .app-card {
+                border-radius: 20px;
+            }
+
+            .panel {
+                gap: 0.9rem;
+            }
+
+            .actions {
+                gap: 10px;
+            }
+
+            .prompt-box {
+                min-height: 6.2rem;
+                border-radius: 18px;
+            }
+
+            .step {
+                border-radius: 16px;
+            }
+
+            .presentation-view {
+                padding: 14px;
+            }
+
+            .guide {
+                width: 100%;
+            }
+
+            .ring-wrap {
+                width: min(180px, 72vw);
+            }
+
+            .timer {
+                font-size: 2rem;
+            }
+        }
     </style>
-    </head>
-    <body>
-    <div class="app-shell">
-    <div class="app-card">
-        <section class="setup-view" id="setupView">
-        <div class="brand">
-            <div class="brand-badge">✦</div>
-            <h1>Think Quick!</h1>
-            <p>Think Fast. Speak Smart.</p>
-        </div>
-        <div class="panel">
-            <div class="controls">
-            <div class="field">
-                <label>Type</label>
-                <div class="type-toggle-group" role="group" aria-label="Challenge type">
-                <button type="button" class="type-toggle is-active" data-type="question" aria-pressed="true">Question</button>
-                <button type="button" class="type-toggle" data-type="phrase" aria-pressed="false">Word / Phrase</button>
-                </div>
-                <select id="type" hidden>
-                <option value="question">Question</option>
-                <option value="phrase">Word / Phrase</option>
-                </select>
-            </div>
-            <div class="field">
-                <label>Category</label>
-                <select id="category">
-                <option>Technology</option>
-                <option>Science</option>
-                <option>Nature</option>
-                <option>Philosophy</option>
-                <option>Education</option>
-                <option>Lifestyle</option>
-                <option>Business</option>
-                <option>History</option>
-                <option>Psychology</option>
-                <option>Entertainment</option>
-                <option>Sports</option>
-                <option>General</option>
-                </select>
-            </div>
-            </div>
-            <div class="actions">
-            <button class="generate-btn" onclick="generatePrompt()">Generate Challenge</button>
-            <button class="surprise-btn" onclick="surpriseMe()">Surprise Me</button>
-            </div>
-            <div class="challenge-block">
-            <p class="challenge-label">Current Challenge</p>
-            <div class="prompt-box" id="prompt">
-                <div class="placeholder">YOUR CHALLENGE</div>
-            </div>
-            <div class="challenge-actions">
-                <button class="start-btn is-hidden" id="startBtn" onclick="startTimer()">Start 1-Minute Round</button>
-            </div>
-            </div>
-        </div>
-        </section>
+</head>
 
-        <section class="presentation-view" id="presentationView" aria-hidden="true">
-        <button class="close-btn" onclick="exitPresentationMode()">Close</button>
-        <div class="presentation-inner">
-            <div class="presentation-challenge">
-            <p class="challenge-label">Current Challenge</p>
-            <div class="presentation-prompt" id="presentationPrompt">YOUR CHALLENGE</div>
-            </div>
-            <div class="timer-panel">
-            <div class="ring-wrap">
-                <svg viewBox="0 0 120 120">
-                <circle class="ring-track" cx="60" cy="60" r="54"></circle>
-                <circle class="ring-progress" id="ringProgress" cx="60" cy="60" r="54"></circle>
-                </svg>
-                <div class="timer-shell">
-                <div class="timer" id="timer">01:00</div>
-                <div class="timer-caption">Speak now</div>
+<body>
+    <div class="app-shell">
+        <div class="app-card">
+            <section class="setup-view" id="setupView">
+                <div class="brand">
+                    <div class="brand-badge">✦</div>
+                    <h1>Think Quick!</h1>
+                    <p>Think Fast. Speak Smart.</p>
                 </div>
-                <div class="progress" id="progress"></div>
-            </div>
-            </div>
-            <div class="completion-card" id="completionCard" aria-live="polite">
-            <div class="completion-title">🎉 Time is up!</div>
-            <div class="completion-copy">Great job practicing your impromptu speech.</div>
-            <div class="completion-copy">Generate another challenge and keep improving.</div>
-            </div>
-            <div class="guide">
-            <div class="step" id="point"><span class="step-indicator"></span><span class="step-label">Point</span></div>
-            <div class="step" id="reason"><span class="step-indicator"></span><span class="step-label">Reason</span></div>
-            <div class="step" id="example"><span class="step-indicator"></span><span class="step-label">Example</span></div>
-            <div class="step" id="conclusion"><span class="step-indicator"></span><span class="step-label">Conclusion</span></div>
-            </div>
+                <div class="panel">
+                    <div class="controls">
+                        <div class="field">
+                            <label>Type</label>
+                            <div class="type-toggle-group" role="group" aria-label="Challenge type">
+                                <button type="button" class="type-toggle is-active" data-type="question"
+                                    aria-pressed="true">Question</button>
+                                <button type="button" class="type-toggle" data-type="phrase" aria-pressed="false">Word /
+                                    Phrase</button>
+                            </div>
+                            <select id="type" hidden>
+                                <option value="question">Question</option>
+                                <option value="phrase">Word / Phrase</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Category</label>
+                            <select id="category">
+                                <option>Technology</option>
+                                <option>Science</option>
+                                <option>Nature</option>
+                                <option>Philosophy</option>
+                                <option>Education</option>
+                                <option>Lifestyle</option>
+                                <option>Business</option>
+                                <option>History</option>
+                                <option>Psychology</option>
+                                <option>Entertainment</option>
+                                <option>Sports</option>
+                                <option>General</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="actions">
+                        <button class="generate-btn" onclick="generatePrompt()">Generate Challenge</button>
+                        <button class="surprise-btn" onclick="surpriseMe()">Surprise Me</button>
+                    </div>
+                    <div class="challenge-block">
+                        <p class="challenge-label">Current Challenge</p>
+                        <div class="prompt-box" id="prompt">
+                            <div class="placeholder">YOUR CHALLENGE</div>
+                        </div>
+                        <div class="challenge-actions">
+                            <button class="start-btn is-hidden" id="startBtn" onclick="startTimer()">Start 1-Minute
+                                Round</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="presentation-view" id="presentationView" aria-hidden="true">
+                <button class="close-btn" onclick="exitPresentationMode()">Close</button>
+                <div class="presentation-inner">
+                    <div class="presentation-challenge">
+                        <p class="challenge-label">Current Challenge</p>
+                        <div class="presentation-prompt" id="presentationPrompt">YOUR CHALLENGE</div>
+                    </div>
+                    <div class="timer-panel">
+                        <div class="ring-wrap">
+                            <svg viewBox="0 0 120 120">
+                                <circle class="ring-track" cx="60" cy="60" r="54"></circle>
+                                <circle class="ring-progress" id="ringProgress" cx="60" cy="60" r="54"></circle>
+                            </svg>
+                            <div class="timer-shell">
+                                <div class="timer" id="timer">01:00</div>
+                                <div class="timer-caption">Speak now</div>
+                            </div>
+                            <div class="progress" id="progress"></div>
+                        </div>
+                    </div>
+                    <div class="completion-card" id="completionCard" aria-live="polite">
+                        <div class="completion-title">🎉 Time is up!</div>
+                        <div class="completion-copy">Great job practicing your impromptu speech.</div>
+                        <div class="completion-copy">Generate another challenge and keep improving.</div>
+                    </div>
+                    <div class="guide">
+                        <div class="step" id="point"><span class="step-indicator"></span><span
+                                class="step-label">Point</span></div>
+                        <div class="step" id="reason"><span class="step-indicator"></span><span
+                                class="step-label">Reason</span></div>
+                        <div class="step" id="example"><span class="step-indicator"></span><span
+                                class="step-label">Example</span></div>
+                        <div class="step" id="conclusion"><span class="step-indicator"></span><span
+                                class="step-label">Conclusion</span></div>
+                    </div>
+                </div>
+            </section>
         </div>
-        </section>
-    </div>
     </div>
     <audio id="generateSound" src="sounds/generate.mp3" preload="auto"></audio>
     <audio id="startSound" src="sounds/start.mp3" preload="auto"></audio>
     <audio id="finishSound" src="sounds/finish.mp3" preload="auto"></audio>
     <script>
-    const WORKER_URL = "https://think-quick.amberprincessrosana.workers.dev/";
-    const MODEL = "nvidia/nemotron-3-super-120b-a12b:free";
-    const soundFiles = {
-        generate: 'sounds/generate.mp3',
-        start: 'sounds/start.mp3',
-        finish: 'sounds/finish.mp3'
-    };
-    const soundPlayers = {};
-    let soundLock = false;
-    let audioUnlocked = false;
-
-    document.addEventListener("click", () => {
-        if (audioUnlocked) return;
-
-        Object.values(soundPlayers).forEach(audio => {
-            audio.play().then(() => {
-                audio.pause();
-                audio.currentTime = 0;
-            }).catch(() => {});
-        });
-
-        audioUnlocked = true;
-    }, { once: true });
-
-    // Timer state is reset cleanly whenever the presentation view is closed or a new round starts.
-    let totalTime = 60;
-    let timeLeft = 60;
-    let timerInterval = null;
-    let timerActive = false;
-    let timerResetToken = 0;
-
-    // ================================
-    // LOCAL PROMPT POOL
-    // ================================
-    const promptPool = {
-        technology: {
-            questions: [
-            ],
-            words: [
-                "automation",
-                "innovation",
-                "platform"
-            ],
-            phrases: [
-                "future of work",
-                "digital identity",
-                "smart living"
-            ]
-        },
-        science: {
-            questions: [
-                "What is one scientific idea that changed the way people think about the world?",
-                "How might space travel become more common in the future?",
-                "Why is curiosity important in science?"
-            ],
-            words: [
-                "discovery",
-                "experiment",
-                "evolution"
-            ],
-            phrases: [
-                "natural balance",
-                "human curiosity",
-                "scientific method"
-            ]
-        },
-        nature: {
-            questions: [
-                "Why do people often feel calmer when they spend time outdoors?",
-                "What might happen if one species disappears from an ecosystem?",
-                "How does nature inspire creativity?"
-            ],
-            words: [
-                "ecosystem",
-                "renewal",
-                "wildlife"
-            ],
-            phrases: [
-                "season of change",
-                "living in harmony",
-                "the power of rain"
-            ]
-        },
-        philosophy: {
-            questions: [
-                "What makes a good life meaningful?",
-                "Is it easier to follow your heart or your mind?",
-                "Why do people ask big questions even when they may never find perfect answers?"
-            ],
-            words: [
-                "purpose",
-                "reflection",
-                "ethics"
-            ],
-            phrases: [
-                "the meaning of success",
-                "a life of values",
-                "questions that matter"
-            ]
-        },
-        education: {
-            questions: [
-                "What makes a teacher memorable?",
-                "Why is learning something new often uncomfortable at first?",
-                "How can schools help students become more confident?"
-            ],
-            words: [
-                "curiosity",
-                "discipline",
-                "knowledge"
-            ],
-            phrases: [
-                "learning by doing",
-                "skills for life",
-                "growth mindset"
-            ]
-        },
-        lifestyle: {
-            questions: [
-                "How can a daily routine improve your mood?",
-                "What is one habit that helps people feel more balanced?",
-                "Why do small changes sometimes create a big difference?"
-            ],
-            words: [
-                "balance",
-                "wellness",
-                "routine"
-            ],
-            phrases: [
-                "slow living",
-                "daily habits",
-                "mindful choices"
-            ]
-        },
-        business: {
-            questions: [
-                "What makes a team work well together?",
-                "Why do some ideas become successful while others fade away?",
-                "How can a leader build trust?"
-            ],
-            words: [
-                "strategy",
-                "vision",
-                "growth"
-            ],
-            phrases: [
-                "building momentum",
-                "smart decision making",
-                "creative leadership"
-            ]
-        },
-        history: {
-            questions: [
-                "What can people learn from the mistakes of the past?",
-                "Why do certain historical events still shape the present?",
-                "How do stories from history help people understand change?"
-            ],
-            words: [
-                "legacy",
-                "tradition",
-                "memory"
-            ],
-            phrases: [
-                "lessons from the past",
-                "the weight of history",
-                "voices of time"
-            ]
-        },
-        psychology: {
-            questions: [
-                "Why do people sometimes judge themselves too harshly?",
-                "How does confidence change the way people speak and act?",
-                "What helps someone recover after a setback?"
-            ],
-            words: [
-                "focus",
-                "resilience",
-                "identity"
-            ],
-            phrases: [
-                "inner confidence",
-                "healthy mindset",
-                "emotional strength"
-            ]
-        },
-        entertainment: {
-            questions: [
-                "Why do certain stories stay with people for years?",
-                "What makes a performance feel memorable?",
-                "How does humor help people connect?"
-            ],
-            words: [
-                "storytelling",
-                "imagination",
-                "performance"
-            ],
-            phrases: [
-                "shared laughter",
-                "captivating stories",
-                "creative expression"
-            ]
-        },
-        sports: {
-            questions: [
-                "What does teamwork teach people outside of sports?",
-                "Why do athletes often learn discipline from their training?",
-                "How can pressure make a person stronger?"
-            ],
-            words: [
-                "discipline",
-                "endurance",
-                "momentum"
-            ],
-            phrases: [
-                "the power of practice",
-                "a winning mindset",
-                "team spirit"
-            ]
-        },
-        general: {
-            questions: [
-                "What is one thing you would like to understand better?",
-                "Why do people enjoy sharing their opinions?",
-                "What helps someone speak with confidence?"
-            ],
-            words: [
-                "clarity",
-                "courage",
-                "focus"
-            ],
-            phrases: [
-                "finding your voice",
-                "thinking on your feet",
-                "shaping an idea"
-            ]
-        }
-    };
-
-    const STORAGE_KEY = 'think-quick-used-prompts-v1';
-    const PROMPT_CACHE_KEY = 'think-quick-prompt-cache-v1';
-
-    // ================================
-    // PROMPT CACHE HELPERS
-    // ================================
-    function loadPromptCache() {
-        try {
-            const saved = localStorage.getItem(PROMPT_CACHE_KEY);
-            if (!saved) return {};
-            const parsed = JSON.parse(saved);
-            return parsed && typeof parsed === 'object' ? parsed : {};
-        } catch (err) {
-            console.warn('Unable to load prompt cache:', err);
-            return {};
-        }
-    }
-
-    function savePromptCache(cache) {
-        try {
-            localStorage.setItem(PROMPT_CACHE_KEY, JSON.stringify(cache));
-        } catch (err) {
-            console.warn('Unable to save prompt cache:', err);
-        }
-    }
-
-    function clearPromptCache() {
-        try {
-            localStorage.removeItem(PROMPT_CACHE_KEY);
-        } catch (err) {
-            console.warn('Unable to clear prompt cache:', err);
-        }
-    }
-
-    function normalizePromptBatch(prompts) {
-        const normalized = [];
-        const seen = new Set();
-
-        prompts.forEach((prompt) => {
-            if (typeof prompt !== 'string') return;
-
-            const trimmed = prompt.trim();
-            if (!trimmed) return;
-
-            const clean = trimmed.replace(/^['"]|['"]$/g, '').trim();
-            if (!clean) return;
-
-            const key = clean.toLowerCase();
-            if (seen.has(key)) return;
-
-            seen.add(key);
-            normalized.push(clean);
-        });
-
-        return normalized;
-    }
-
-    function getPromptCacheEntry(cache, category, type) {
-        const normalizedCategory = normalizeCategory(category);
-        const normalizedType = type === 'question' ? 'question' : 'phrase';
-
-        if (!cache[normalizedCategory]) {
-            cache[normalizedCategory] = {};
-        }
-
-        if (!cache[normalizedCategory][normalizedType]) {
-            cache[normalizedCategory][normalizedType] = { remaining: [], used: [] };
-        }
-
-        return {
-            cache,
-            normalizedCategory,
-            normalizedType,
-            entry: cache[normalizedCategory][normalizedType]
+        const WORKER_URL = "https://think-quick.amberprincessrosana.workers.dev/";
+        const MODEL = "nvidia/nemotron-3-super-120b-a12b:free";
+        const soundFiles = {
+            generate: 'sounds/generate.mp3',
+            start: 'sounds/start.mp3',
+            finish: 'sounds/finish.mp3'
         };
-    }
+        const soundPlayers = {};
+        let soundLock = false;
+        let audioUnlocked = false;
 
-    function savePromptBatchToCache(category, type, prompts) {
-        const cache = loadPromptCache();
-        const { normalizedCategory, normalizedType, entry } = getPromptCacheEntry(cache, category, type);
-        const normalizedPrompts = normalizePromptBatch(prompts);
-        const usedPrompts = Array.isArray(entry.used) ? entry.used : [];
-        const remainingPrompts = Array.isArray(entry.remaining) ? entry.remaining : [];
+        document.addEventListener("click", () => {
+            if (audioUnlocked) return;
 
-        const combinedPrompts = [...remainingPrompts, ...normalizedPrompts];
-        const filteredPrompts = normalizePromptBatch(combinedPrompts).filter((prompt) => !usedPrompts.includes(prompt));
-
-        entry.remaining = filteredPrompts;
-        entry.used = usedPrompts;
-        cache[normalizedCategory][normalizedType] = entry;
-        savePromptCache(cache);
-        return entry;
-    }
-
-    function takeNextPromptFromCache(category, type) {
-        const cache = loadPromptCache();
-        const { normalizedCategory, normalizedType, entry } = getPromptCacheEntry(cache, category, type);
-        const remainingPrompts = Array.isArray(entry.remaining) ? entry.remaining : [];
-
-        if (remainingPrompts.length === 0) {
-            return null;
-        }
-
-        const randomIndex = Math.floor(Math.random() * remainingPrompts.length);
-        const prompt = remainingPrompts[randomIndex];
-        const updatedRemainingPrompts = remainingPrompts.filter((_, index) => index !== randomIndex);
-        const usedPrompts = Array.isArray(entry.used) ? entry.used : [];
-
-        entry.remaining = updatedRemainingPrompts;
-        entry.used = usedPrompts.includes(prompt) ? usedPrompts : [...usedPrompts, prompt];
-        cache[normalizedCategory][normalizedType] = entry;
-        savePromptCache(cache);
-        return prompt;
-    }
-
-    // ================================
-    // LOCAL STORAGE HELPERS
-    // ================================
-    function loadUsedPrompts() {
-        try {
-            const saved = localStorage.getItem(STORAGE_KEY);
-            if (!saved) return {};
-            const parsed = JSON.parse(saved);
-            return parsed && typeof parsed === 'object' ? parsed : {};
-        } catch (err) {
-            console.warn('Unable to load prompt history:', err);
-            return {};
-        }
-    }
-
-    function saveUsedPrompts(history) {
-        try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
-        } catch (err) {
-            console.warn('Unable to save prompt history:', err);
-        }
-    }
-
-    function clearUsedPrompts(category = null, type = null) {
-        const history = loadUsedPrompts();
-
-        if (!category || !type) {
-            saveUsedPrompts({});
-            return;
-        }
-
-        if (!history[category]) {
-            history[category] = {};
-        }
-
-        history[category][type] = [];
-        saveUsedPrompts(history);
-    }
-
-    function normalizeCategory(category) {
-        const safeCategory = String(category || 'general').trim().toLowerCase();
-        return safeCategory.replace(/[^a-z0-9]+/g, '');
-    }
-
-    function addUsedPrompt(prompt, category, type) {
-        if (!prompt || typeof prompt !== 'string') return;
-
-        const history = loadUsedPrompts();
-        const normalizedCategory = normalizeCategory(category);
-        const normalizedType = type === 'question' ? 'questions' : type === 'phrase' ? 'phrases' : type;
-
-        if (!history[normalizedCategory]) {
-            history[normalizedCategory] = {};
-        }
-
-        if (!Array.isArray(history[normalizedCategory][normalizedType])) {
-            history[normalizedCategory][normalizedType] = [];
-        }
-
-        if (!history[normalizedCategory][normalizedType].includes(prompt)) {
-            history[normalizedCategory][normalizedType].push(prompt);
-        }
-
-        saveUsedPrompts(history);
-    }
-
-    // ================================
-    // FALLBACK PROMPT SYSTEM
-    // ================================
-    function getFallbackPrompt(category, type) {
-        const normalizedCategory = normalizeCategory(category);
-        const poolCategory = promptPool[normalizedCategory] || promptPool.general;
-        const history = loadUsedPrompts();
-
-        let sourceOptions = [];
-
-        if (type === 'question') {
-            sourceOptions = [{ key: 'questions', prompts: poolCategory.questions || [] }];
-        } else {
-            sourceOptions = [
-                { key: 'words', prompts: poolCategory.words || [] },
-                { key: 'phrases', prompts: poolCategory.phrases || [] }
-            ];
-        }
-
-        const availableSources = sourceOptions.filter((source) => source.prompts.length > 0);
-        if (availableSources.length === 0) {
-            return 'Unable to generate a challenge. Please try again.';
-        }
-
-        const usableSources = availableSources.filter((source) => {
-            const usedPrompts = history[normalizedCategory]?.[source.key] || [];
-            return source.prompts.some((prompt) => !usedPrompts.includes(prompt));
-        });
-
-        let selectedSource;
-
-        if (usableSources.length === 0) {
-            availableSources.forEach((source) => {
-                clearUsedPrompts(normalizedCategory, source.key);
+            Object.values(soundPlayers).forEach(audio => {
+                audio.play().then(() => {
+                    audio.pause();
+                    audio.currentTime = 0;
+                }).catch(() => { });
             });
 
-            selectedSource = availableSources[Math.floor(Math.random() * availableSources.length)];
-        } else {
-            selectedSource = usableSources[Math.floor(Math.random() * usableSources.length)];
-        }
+            audioUnlocked = true;
+        }, { once: true });
 
-        const usedPrompts = loadUsedPrompts()[normalizedCategory]?.[selectedSource.key] || [];
-        const remainingPrompts = selectedSource.prompts.filter((prompt) => !usedPrompts.includes(prompt));
+        // Timer state is reset cleanly whenever the presentation view is closed or a new round starts.
+        let totalTime = 60;
+        let timeLeft = 60;
+        let timerInterval = null;
+        let timerActive = false;
+        let timerResetToken = 0;
 
-        if (remainingPrompts.length === 0) {
-            const freshHistory = loadUsedPrompts();
-            const resetUsedPrompts = freshHistory[normalizedCategory]?.[selectedSource.key] || [];
-            const freshRemaining = selectedSource.prompts.filter((prompt) => !resetUsedPrompts.includes(prompt));
+        // ================================
+        // LOCAL PROMPT POOL
+        // ================================
+        const promptPool = {
+            technology: {
+                questions: [
+                ],
+                words: [
+                    "automation",
+                    "innovation",
+                    "platform"
+                ],
+                phrases: [
+                    "future of work",
+                    "digital identity",
+                    "smart living"
+                ]
+            },
+            science: {
+                questions: [
+                    "What is one scientific idea that changed the way people think about the world?",
+                    "How might space travel become more common in the future?",
+                    "Why is curiosity important in science?"
+                ],
+                words: [
+                    "discovery",
+                    "experiment",
+                    "evolution"
+                ],
+                phrases: [
+                    "natural balance",
+                    "human curiosity",
+                    "scientific method"
+                ]
+            },
+            nature: {
+                questions: [
+                    "Why do people often feel calmer when they spend time outdoors?",
+                    "What might happen if one species disappears from an ecosystem?",
+                    "How does nature inspire creativity?"
+                ],
+                words: [
+                    "ecosystem",
+                    "renewal",
+                    "wildlife"
+                ],
+                phrases: [
+                    "season of change",
+                    "living in harmony",
+                    "the power of rain"
+                ]
+            },
+            philosophy: {
+                questions: [
+                    "What makes a good life meaningful?",
+                    "Is it easier to follow your heart or your mind?",
+                    "Why do people ask big questions even when they may never find perfect answers?"
+                ],
+                words: [
+                    "purpose",
+                    "reflection",
+                    "ethics"
+                ],
+                phrases: [
+                    "the meaning of success",
+                    "a life of values",
+                    "questions that matter"
+                ]
+            },
+            education: {
+                questions: [
+                    "What makes a teacher memorable?",
+                    "Why is learning something new often uncomfortable at first?",
+                    "How can schools help students become more confident?"
+                ],
+                words: [
+                    "curiosity",
+                    "discipline",
+                    "knowledge"
+                ],
+                phrases: [
+                    "learning by doing",
+                    "skills for life",
+                    "growth mindset"
+                ]
+            },
+            lifestyle: {
+                questions: [
+                    "How can a daily routine improve your mood?",
+                    "What is one habit that helps people feel more balanced?",
+                    "Why do small changes sometimes create a big difference?"
+                ],
+                words: [
+                    "balance",
+                    "wellness",
+                    "routine"
+                ],
+                phrases: [
+                    "slow living",
+                    "daily habits",
+                    "mindful choices"
+                ]
+            },
+            business: {
+                questions: [
+                    "What makes a team work well together?",
+                    "Why do some ideas become successful while others fade away?",
+                    "How can a leader build trust?"
+                ],
+                words: [
+                    "strategy",
+                    "vision",
+                    "growth"
+                ],
+                phrases: [
+                    "building momentum",
+                    "smart decision making",
+                    "creative leadership"
+                ]
+            },
+            history: {
+                questions: [
+                    "What can people learn from the mistakes of the past?",
+                    "Why do certain historical events still shape the present?",
+                    "How do stories from history help people understand change?"
+                ],
+                words: [
+                    "legacy",
+                    "tradition",
+                    "memory"
+                ],
+                phrases: [
+                    "lessons from the past",
+                    "the weight of history",
+                    "voices of time"
+                ]
+            },
+            psychology: {
+                questions: [
+                    "Why do people sometimes judge themselves too harshly?",
+                    "How does confidence change the way people speak and act?",
+                    "What helps someone recover after a setback?"
+                ],
+                words: [
+                    "focus",
+                    "resilience",
+                    "identity"
+                ],
+                phrases: [
+                    "inner confidence",
+                    "healthy mindset",
+                    "emotional strength"
+                ]
+            },
+            entertainment: {
+                questions: [
+                    "Why do certain stories stay with people for years?",
+                    "What makes a performance feel memorable?",
+                    "How does humor help people connect?"
+                ],
+                words: [
+                    "storytelling",
+                    "imagination",
+                    "performance"
+                ],
+                phrases: [
+                    "shared laughter",
+                    "captivating stories",
+                    "creative expression"
+                ]
+            },
+            sports: {
+                questions: [
+                    "What does teamwork teach people outside of sports?",
+                    "Why do athletes often learn discipline from their training?",
+                    "How can pressure make a person stronger?"
+                ],
+                words: [
+                    "discipline",
+                    "endurance",
+                    "momentum"
+                ],
+                phrases: [
+                    "the power of practice",
+                    "a winning mindset",
+                    "team spirit"
+                ]
+            },
+            general: {
+                questions: [
+                    "What is one thing you would like to understand better?",
+                    "Why do people enjoy sharing their opinions?",
+                    "What helps someone speak with confidence?"
+                ],
+                words: [
+                    "clarity",
+                    "courage",
+                    "focus"
+                ],
+                phrases: [
+                    "finding your voice",
+                    "thinking on your feet",
+                    "shaping an idea"
+                ]
+            }
+        };
 
-            if (freshRemaining.length === 0) {
-                const fallbackPrompt = selectedSource.prompts[0] || 'Unable to generate a challenge. Please try again.';
-                addUsedPrompt(fallbackPrompt, normalizedCategory, selectedSource.key);
-                return fallbackPrompt;
+        const STORAGE_KEY = 'think-quick-used-prompts-v1';
+        const PROMPT_CACHE_KEY = 'think-quick-prompt-cache-v1';
+
+        // ================================
+        // PROMPT CACHE HELPERS
+        // ================================
+        function loadPromptCache() {
+            try {
+                const saved = localStorage.getItem(PROMPT_CACHE_KEY);
+                if (!saved) return {};
+                const parsed = JSON.parse(saved);
+                return parsed && typeof parsed === 'object' ? parsed : {};
+            } catch (err) {
+                console.warn('Unable to load prompt cache:', err);
+                return {};
             }
         }
 
-        const selectedPrompt = remainingPrompts[Math.floor(Math.random() * remainingPrompts.length)] || selectedSource.prompts[0] || 'Unable to generate a challenge. Please try again.';
-        addUsedPrompt(selectedPrompt, normalizedCategory, selectedSource.key);
-        return selectedPrompt;
-    }
-
-    // ================================
-    // AI GENERATION
-    // ================================
-    function parsePromptBatchResponse(content) {
-        if (typeof content !== 'string') return null;
-
-        let normalized = content.trim();
-        const fencedMatch = normalized.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
-
-        if (fencedMatch) {
-            normalized = fencedMatch[1].trim();
-        }
-
-        const jsonStart = normalized.indexOf('[');
-        const jsonEnd = normalized.lastIndexOf(']');
-
-        if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
-            normalized = normalized.slice(jsonStart, jsonEnd + 1);
-        }
-
-        try {
-            const parsed = JSON.parse(normalized);
-            if (!Array.isArray(parsed)) {
-                return null;
+        function savePromptCache(cache) {
+            try {
+                localStorage.setItem(PROMPT_CACHE_KEY, JSON.stringify(cache));
+            } catch (err) {
+                console.warn('Unable to save prompt cache:', err);
             }
-
-            return normalizePromptBatch(parsed);
-        } catch (err) {
-            return null;
-        }
-    }
-
-    async function generateAI(type, category) {
-        console.log('generateAI called with', { type, category });
-
-        let instruction;
-
-        if (type === 'question') {
-            instruction = `Generate exactly 20 unique impromptu speaking questions.\n\nCategory:\n${category}\n\nRules:\n- One sentence each\n- Suitable for students\n- Good for a 1-minute speech\n- No explanations\n- No numbering\n- Return ONLY a JSON array`;
-        } else {
-            instruction = `Generate exactly 20 unique speaking practice words or phrases.\n\nCategory:\n${category}\n\nRules:\n- 1 to 3 words only\n- No explanations\n- No quotation marks\n- Return ONLY a JSON array`;
         }
 
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 12000);
+        function clearPromptCache() {
+            try {
+                localStorage.removeItem(PROMPT_CACHE_KEY);
+            } catch (err) {
+                console.warn('Unable to clear prompt cache:', err);
+            }
+        }
 
-        try {
-            const response = await fetch(WORKER_URL, {
-                signal: controller.signal,
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ model: MODEL, messages: [{ role: 'user', content: instruction }], temperature: 1 })
+        function normalizePromptBatch(prompts) {
+            const normalized = [];
+            const seen = new Set();
+
+            prompts.forEach((prompt) => {
+                if (typeof prompt !== 'string') return;
+
+                const trimmed = prompt.trim();
+                if (!trimmed) return;
+
+                const clean = trimmed.replace(/^['"]|['"]$/g, '').trim();
+                if (!clean) return;
+
+                const key = clean.toLowerCase();
+                if (seen.has(key)) return;
+
+                seen.add(key);
+                normalized.push(clean);
             });
 
-            if (!response.ok) {
-                return null;
-            }
-
-            const data = await response.json();
-
-            if (data?.error) {
-                return null;
-            }
-
-            if (!Array.isArray(data.choices) || data.choices.length === 0) {
-                return null;
-            }
-
-            const choice = data.choices[0];
-            const content = choice?.message?.content || choice?.text || '';
-
-            if (!content || typeof content !== 'string') {
-                return null;
-            }
-
-            return parsePromptBatchResponse(content);
-        } catch (err) {
-            return null;
-        } finally {
-            clearTimeout(timeoutId);
+            return normalized;
         }
-    }
 
-    // ================================
-    // GENERATE PROMPT
-    // ================================
-    function playSound(type) {
-        const path = soundFiles[type];
-        if (!path || soundLock) return;
+        function getPromptCacheEntry(cache, category, type) {
+            const normalizedCategory = normalizeCategory(category);
+            const normalizedType = type === 'question' ? 'question' : 'phrase';
 
-        try {
-            let audio = soundPlayers[type];
-            if (!audio) {
-                audio = new Audio(path);
-                audio.preload = 'auto';
-                soundPlayers[type] = audio;
+            if (!cache[normalizedCategory]) {
+                cache[normalizedCategory] = {};
             }
 
-            soundLock = true;
-            audio.currentTime = 0;
-            audio.play().catch(() => {
-                console.log('Sound unavailable');
-            });
+            if (!cache[normalizedCategory][normalizedType]) {
+                cache[normalizedCategory][normalizedType] = { remaining: [], used: [] };
+            }
 
-            const releaseLock = () => {
-                soundLock = false;
+            return {
+                cache,
+                normalizedCategory,
+                normalizedType,
+                entry: cache[normalizedCategory][normalizedType]
             };
-
-            audio.addEventListener('ended', releaseLock, { once: true });
-            audio.addEventListener('error', releaseLock, { once: true });
-            setTimeout(releaseLock, 220);
-        } catch (err) {
-            console.log('Sound unavailable');
         }
-    }
 
-    function setStartButtonVisibility(visible) {
-        const button = document.getElementById('startBtn');
-        if (!button) return;
-        button.classList.toggle('is-visible', visible);
-        button.classList.toggle('is-hidden', !visible);
-        button.setAttribute('aria-hidden', visible ? 'false' : 'true');
-    }
+        function savePromptBatchToCache(category, type, prompts) {
+            const cache = loadPromptCache();
+            const { normalizedCategory, normalizedType, entry } = getPromptCacheEntry(cache, category, type);
+            const normalizedPrompts = normalizePromptBatch(prompts);
+            const usedPrompts = Array.isArray(entry.used) ? entry.used : [];
+            const remainingPrompts = Array.isArray(entry.remaining) ? entry.remaining : [];
 
-    function setGenerateButtonBusy(isBusy) {
-        const button = document.querySelector('.generate-btn');
-        if (!button) return;
-        button.disabled = isBusy;
-        button.style.opacity = isBusy ? '0.8' : '';
-        button.style.cursor = isBusy ? 'wait' : '';
-    }
+            const combinedPrompts = [...remainingPrompts, ...normalizedPrompts];
+            const filteredPrompts = normalizePromptBatch(combinedPrompts).filter((prompt) => !usedPrompts.includes(prompt));
 
-    function setPromptBoxState(state, message) {
-        const promptBox = document.getElementById('prompt');
-        if (!promptBox) return;
-
-        promptBox.textContent = message;
-        promptBox.classList.remove('is-animating');
-
-        if (state === 'loading') {
-            promptBox.innerHTML = '<div class="placeholder loading">✨ AI is thinking...</div>';
-            promptBox.style.color = '';
-            promptBox.style.background = '';
-            promptBox.style.borderColor = '';
-        } else if (state === 'error') {
-            promptBox.style.color = '#ff8fa3';
-            promptBox.style.background = 'rgba(255, 111, 145, 0.12)';
-            promptBox.style.borderColor = 'rgba(255, 111, 145, 0.25)';
-        } else {
-            promptBox.style.color = '';
-            promptBox.style.background = '';
-            promptBox.style.borderColor = '';
+            entry.remaining = filteredPrompts;
+            entry.used = usedPrompts;
+            cache[normalizedCategory][normalizedType] = entry;
+            savePromptCache(cache);
+            return entry;
         }
-    }
 
-    function setTypeSelection(value) {
-        const typeSelect = document.getElementById('type');
-        const toggles = document.querySelectorAll('.type-toggle');
-        if (!typeSelect) return;
+        function takeNextPromptFromCache(category, type) {
+            const cache = loadPromptCache();
+            const { normalizedCategory, normalizedType, entry } = getPromptCacheEntry(cache, category, type);
+            const remainingPrompts = Array.isArray(entry.remaining) ? entry.remaining : [];
 
-        typeSelect.value = value;
-        toggles.forEach((toggle) => {
-            const isActive = toggle.dataset.type === value;
-            toggle.classList.toggle('is-active', isActive);
-            toggle.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-        });
-    }
+            if (remainingPrompts.length === 0) {
+                return null;
+            }
 
-    function animatePromptBox() {
-        const promptBox = document.getElementById('prompt');
-        if (!promptBox) return;
-        promptBox.classList.remove('is-animating');
-        void promptBox.offsetWidth;
-        promptBox.classList.add('is-animating');
-    }
+            const randomIndex = Math.floor(Math.random() * remainingPrompts.length);
+            const prompt = remainingPrompts[randomIndex];
+            const updatedRemainingPrompts = remainingPrompts.filter((_, index) => index !== randomIndex);
+            const usedPrompts = Array.isArray(entry.used) ? entry.used : [];
 
-    async function generatePrompt(){
-        const type = document.getElementById("type").value;
-        const category = document.getElementById("category").value;
-        const promptBox = document.getElementById("prompt");
+            entry.remaining = updatedRemainingPrompts;
+            entry.used = usedPrompts.includes(prompt) ? usedPrompts : [...usedPrompts, prompt];
+            cache[normalizedCategory][normalizedType] = entry;
+            savePromptCache(cache);
+            return prompt;
+        }
 
-        console.log("Type:", type);
-        console.log("Category:", category);
+        // ================================
+        // LOCAL STORAGE HELPERS
+        // ================================
+        function loadUsedPrompts() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (!saved) return {};
+                const parsed = JSON.parse(saved);
+                return parsed && typeof parsed === 'object' ? parsed : {};
+            } catch (err) {
+                console.warn('Unable to load prompt history:', err);
+                return {};
+            }
+        }
 
-        setGenerateButtonBusy(true);
-        setPromptBoxState('loading');
-        setStartButtonVisibility(false);
-        hideCompletionCard();
-        stopTimer();
-        syncChallengeToPresentation();
-        playSound('generate');
+        function saveUsedPrompts(history) {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+            } catch (err) {
+                console.warn('Unable to save prompt history:', err);
+            }
+        }
 
-        try {
-            const cachedPrompt = takeNextPromptFromCache(category, type);
+        function clearUsedPrompts(category = null, type = null) {
+            const history = loadUsedPrompts();
 
-            if (cachedPrompt) {
-                promptBox.textContent = cachedPrompt;
-                addUsedPrompt(cachedPrompt, category, type);
-                animatePromptBox();
-                syncChallengeToPresentation();
-                setStartButtonVisibility(true);
+            if (!category || !type) {
+                saveUsedPrompts({});
                 return;
             }
 
-            const result = await generateAI(type, category);
+            if (!history[category]) {
+                history[category] = {};
+            }
 
-            if (Array.isArray(result) && result.length > 0) {
-                savePromptBatchToCache(category, type, result);
-                const nextPrompt = takeNextPromptFromCache(category, type);
+            history[category][type] = [];
+            saveUsedPrompts(history);
+        }
 
-                if (nextPrompt) {
-                    promptBox.textContent = nextPrompt;
-                    addUsedPrompt(nextPrompt, category, type);
+        function normalizeCategory(category) {
+            const safeCategory = String(category || 'general').trim().toLowerCase();
+            return safeCategory.replace(/[^a-z0-9]+/g, '');
+        }
+
+        function addUsedPrompt(prompt, category, type) {
+            if (!prompt || typeof prompt !== 'string') return;
+
+            const history = loadUsedPrompts();
+            const normalizedCategory = normalizeCategory(category);
+            const normalizedType = type === 'question' ? 'questions' : type === 'phrase' ? 'phrases' : type;
+
+            if (!history[normalizedCategory]) {
+                history[normalizedCategory] = {};
+            }
+
+            if (!Array.isArray(history[normalizedCategory][normalizedType])) {
+                history[normalizedCategory][normalizedType] = [];
+            }
+
+            if (!history[normalizedCategory][normalizedType].includes(prompt)) {
+                history[normalizedCategory][normalizedType].push(prompt);
+            }
+
+            saveUsedPrompts(history);
+        }
+
+        // ================================
+        // FALLBACK PROMPT SYSTEM
+        // ================================
+        function getFallbackPrompt(category, type) {
+            const normalizedCategory = normalizeCategory(category);
+            const poolCategory = promptPool[normalizedCategory] || promptPool.general;
+            const history = loadUsedPrompts();
+
+            let sourceOptions = [];
+
+            if (type === 'question') {
+                sourceOptions = [{ key: 'questions', prompts: poolCategory.questions || [] }];
+            } else {
+                sourceOptions = [
+                    { key: 'words', prompts: poolCategory.words || [] },
+                    { key: 'phrases', prompts: poolCategory.phrases || [] }
+                ];
+            }
+
+            const availableSources = sourceOptions.filter((source) => source.prompts.length > 0);
+            if (availableSources.length === 0) {
+                return 'Unable to generate a challenge. Please try again.';
+            }
+
+            const usableSources = availableSources.filter((source) => {
+                const usedPrompts = history[normalizedCategory]?.[source.key] || [];
+                return source.prompts.some((prompt) => !usedPrompts.includes(prompt));
+            });
+
+            let selectedSource;
+
+            if (usableSources.length === 0) {
+                availableSources.forEach((source) => {
+                    clearUsedPrompts(normalizedCategory, source.key);
+                });
+
+                selectedSource = availableSources[Math.floor(Math.random() * availableSources.length)];
+            } else {
+                selectedSource = usableSources[Math.floor(Math.random() * usableSources.length)];
+            }
+
+            const usedPrompts = loadUsedPrompts()[normalizedCategory]?.[selectedSource.key] || [];
+            const remainingPrompts = selectedSource.prompts.filter((prompt) => !usedPrompts.includes(prompt));
+
+            if (remainingPrompts.length === 0) {
+                const freshHistory = loadUsedPrompts();
+                const resetUsedPrompts = freshHistory[normalizedCategory]?.[selectedSource.key] || [];
+                const freshRemaining = selectedSource.prompts.filter((prompt) => !resetUsedPrompts.includes(prompt));
+
+                if (freshRemaining.length === 0) {
+                    const fallbackPrompt = selectedSource.prompts[0] || 'Unable to generate a challenge. Please try again.';
+                    addUsedPrompt(fallbackPrompt, normalizedCategory, selectedSource.key);
+                    return fallbackPrompt;
+                }
+            }
+
+            const selectedPrompt = remainingPrompts[Math.floor(Math.random() * remainingPrompts.length)] || selectedSource.prompts[0] || 'Unable to generate a challenge. Please try again.';
+            addUsedPrompt(selectedPrompt, normalizedCategory, selectedSource.key);
+            return selectedPrompt;
+        }
+
+        // ================================
+        // AI GENERATION
+        // ================================
+        function parsePromptBatchResponse(content) {
+            if (typeof content !== 'string') return null;
+
+            let normalized = content.trim();
+            const fencedMatch = normalized.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+
+            if (fencedMatch) {
+                normalized = fencedMatch[1].trim();
+            }
+
+            const jsonStart = normalized.indexOf('[');
+            const jsonEnd = normalized.lastIndexOf(']');
+
+            if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+                normalized = normalized.slice(jsonStart, jsonEnd + 1);
+            }
+
+            try {
+                const parsed = JSON.parse(normalized);
+                if (!Array.isArray(parsed)) {
+                    return null;
+                }
+
+                return normalizePromptBatch(parsed);
+            } catch (err) {
+                return null;
+            }
+        }
+
+        async function generateAI(type, category) {
+            console.log('generateAI called with', { type, category });
+
+            let instruction;
+            if (type === 'question') {
+                instruction = `Generate exactly 20 unique impromptu speaking questions.\n\nCategory:\n${category}\n\nRules:\n- One sentence each\n- Suitable for students\n- Good for a 1-minute speech\n- No explanations\n- No numbering\n- Return ONLY a JSON array`;
+            } else {
+                instruction = `Generate exactly 20 unique speaking practice words or phrases.\n\nCategory:\n${category}\n\nRules:\n- 1 to 3 words only\n- No explanations\n- No quotation marks\n- Return ONLY a JSON array`;
+            }
+
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 12000);
+
+            try {
+                const response = await fetch(WORKER_URL, {
+                    signal: controller.signal,
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ model: MODEL, messages: [{ role: 'user', content: instruction }], temperature: 1 })
+                });
+
+                console.log('Worker response status:', response.status);
+
+                if (!response.ok) {
+                    const errText = await response.text();
+                    console.error('Worker error body:', errText);
+                    return null;
+                }
+
+                const data = await response.json();
+                console.log('Worker response data:', data);
+
+                if (data?.error) {
+                    console.error('API returned error field:', data.error);
+                    return null;
+                }
+
+                if (!Array.isArray(data.choices) || data.choices.length === 0) {
+                    console.error('No choices in response');
+                    return null;
+                }
+
+                const choice = data.choices[0];
+                const content = choice?.message?.content || choice?.text || '';
+                console.log('Raw content from model:', content);
+
+                if (!content || typeof content !== 'string') {
+                    console.error('Empty or invalid content');
+                    return null;
+                }
+
+                const parsed = parsePromptBatchResponse(content);
+                console.log('Parsed prompts:', parsed);
+                return parsed;
+            } catch (err) {
+                console.error('Fetch/generateAI exception:', err.name, err.message);
+                return null;
+            } finally {
+                clearTimeout(timeoutId);
+            }
+        }
+        // ================================
+        // GENERATE PROMPT
+        // ================================
+        function playSound(type) {
+            const path = soundFiles[type];
+            if (!path || soundLock) return;
+
+            try {
+                let audio = soundPlayers[type];
+                if (!audio) {
+                    audio = new Audio(path);
+                    audio.preload = 'auto';
+                    soundPlayers[type] = audio;
+                }
+
+                soundLock = true;
+                audio.currentTime = 0;
+                audio.play().catch(() => {
+                    console.log('Sound unavailable');
+                });
+
+                const releaseLock = () => {
+                    soundLock = false;
+                };
+
+                audio.addEventListener('ended', releaseLock, { once: true });
+                audio.addEventListener('error', releaseLock, { once: true });
+                setTimeout(releaseLock, 220);
+            } catch (err) {
+                console.log('Sound unavailable');
+            }
+        }
+
+        function setStartButtonVisibility(visible) {
+            const button = document.getElementById('startBtn');
+            if (!button) return;
+            button.classList.toggle('is-visible', visible);
+            button.classList.toggle('is-hidden', !visible);
+            button.setAttribute('aria-hidden', visible ? 'false' : 'true');
+        }
+
+        function setGenerateButtonBusy(isBusy) {
+            const button = document.querySelector('.generate-btn');
+            if (!button) return;
+            button.disabled = isBusy;
+            button.style.opacity = isBusy ? '0.8' : '';
+            button.style.cursor = isBusy ? 'wait' : '';
+        }
+
+        function setPromptBoxState(state, message) {
+            const promptBox = document.getElementById('prompt');
+            if (!promptBox) return;
+
+            promptBox.textContent = message;
+            promptBox.classList.remove('is-animating');
+
+            if (state === 'loading') {
+                promptBox.innerHTML = '<div class="placeholder loading">✨ AI is thinking...</div>';
+                promptBox.style.color = '';
+                promptBox.style.background = '';
+                promptBox.style.borderColor = '';
+            } else if (state === 'error') {
+                promptBox.style.color = '#ff8fa3';
+                promptBox.style.background = 'rgba(255, 111, 145, 0.12)';
+                promptBox.style.borderColor = 'rgba(255, 111, 145, 0.25)';
+            } else {
+                promptBox.style.color = '';
+                promptBox.style.background = '';
+                promptBox.style.borderColor = '';
+            }
+        }
+
+        function setTypeSelection(value) {
+            const typeSelect = document.getElementById('type');
+            const toggles = document.querySelectorAll('.type-toggle');
+            if (!typeSelect) return;
+
+            typeSelect.value = value;
+            toggles.forEach((toggle) => {
+                const isActive = toggle.dataset.type === value;
+                toggle.classList.toggle('is-active', isActive);
+                toggle.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+            });
+        }
+
+        function animatePromptBox() {
+            const promptBox = document.getElementById('prompt');
+            if (!promptBox) return;
+            promptBox.classList.remove('is-animating');
+            void promptBox.offsetWidth;
+            promptBox.classList.add('is-animating');
+        }
+
+        async function generatePrompt() {
+            const type = document.getElementById("type").value;
+            const category = document.getElementById("category").value;
+            const promptBox = document.getElementById("prompt");
+
+            console.log("Type:", type);
+            console.log("Category:", category);
+
+            setGenerateButtonBusy(true);
+            setPromptBoxState('loading');
+            setStartButtonVisibility(false);
+            hideCompletionCard();
+            stopTimer();
+            syncChallengeToPresentation();
+            playSound('generate');
+
+            try {
+                const cachedPrompt = takeNextPromptFromCache(category, type);
+
+                if (cachedPrompt) {
+                    promptBox.textContent = cachedPrompt;
+                    addUsedPrompt(cachedPrompt, category, type);
                     animatePromptBox();
                     syncChallengeToPresentation();
                     setStartButtonVisibility(true);
                     return;
                 }
-            }
 
-            const cache = loadPromptCache();
-            const normalizedCategory = normalizeCategory(category);
-            const normalizedType = type === 'question' ? 'question' : 'phrase';
-            const cacheEntry = cache[normalizedCategory]?.[normalizedType];
-            const hasCachedPrompts = Array.isArray(cacheEntry?.remaining) && cacheEntry.remaining.length > 0;
+                const result = await generateAI(type, category);
 
-            if (!hasCachedPrompts) {
+                if (Array.isArray(result) && result.length > 0) {
+                    savePromptBatchToCache(category, type, result);
+                    const nextPrompt = takeNextPromptFromCache(category, type);
+
+                    if (nextPrompt) {
+                        promptBox.textContent = nextPrompt;
+                        addUsedPrompt(nextPrompt, category, type);
+                        animatePromptBox();
+                        syncChallengeToPresentation();
+                        setStartButtonVisibility(true);
+                        return;
+                    }
+                }
+
+                const cache = loadPromptCache();
+                const normalizedCategory = normalizeCategory(category);
+                const normalizedType = type === 'question' ? 'question' : 'phrase';
+                const cacheEntry = cache[normalizedCategory]?.[normalizedType];
+                const hasCachedPrompts = Array.isArray(cacheEntry?.remaining) && cacheEntry.remaining.length > 0;
+
+                if (!hasCachedPrompts) {
+                    setPromptBoxState('error', 'Generation failed. Please try again.');
+                    syncChallengeToPresentation();
+                    setStartButtonVisibility(false);
+                    return;
+                }
+
+                const fallbackPrompt = getFallbackPrompt(category, type);
+                promptBox.textContent = fallbackPrompt;
+                animatePromptBox();
+                syncChallengeToPresentation();
+                setStartButtonVisibility(true);
+            } catch (err) {
                 setPromptBoxState('error', 'Generation failed. Please try again.');
                 syncChallengeToPresentation();
                 setStartButtonVisibility(false);
-                return;
+            } finally {
+                setGenerateButtonBusy(false);
             }
-
-            const fallbackPrompt = getFallbackPrompt(category, type);
-            promptBox.textContent = fallbackPrompt;
-            animatePromptBox();
-            syncChallengeToPresentation();
-            setStartButtonVisibility(true);
-        } catch (err) {
-            setPromptBoxState('error', 'Generation failed. Please try again.');
-            syncChallengeToPresentation();
-            setStartButtonVisibility(false);
-        } finally {
-            setGenerateButtonBusy(false);
         }
-    }
 
-    function syncChallengeToPresentation() {
-        const promptBox = document.getElementById('prompt');
-        const presentationPrompt = document.getElementById('presentationPrompt');
-        if (!promptBox || !presentationPrompt) return;
-        presentationPrompt.textContent = promptBox.textContent || promptBox.innerText || 'YOUR CHALLENGE';
-    }
+        function syncChallengeToPresentation() {
+            const promptBox = document.getElementById('prompt');
+            const presentationPrompt = document.getElementById('presentationPrompt');
+            if (!promptBox || !presentationPrompt) return;
+            presentationPrompt.textContent = promptBox.textContent || promptBox.innerText || 'YOUR CHALLENGE';
+        }
 
-    function enterPresentationMode() {
-        document.body.classList.add('presentation-mode');
-    }
+        function enterPresentationMode() {
+            document.body.classList.add('presentation-mode');
+        }
 
-    function exitPresentationMode() {
-        document.body.classList.remove('presentation-mode');
-        stopTimer();
-    }
+        function exitPresentationMode() {
+            document.body.classList.remove('presentation-mode');
+            stopTimer();
+        }
 
-    function surpriseMe() {
-        const types = ['question', 'phrase'];
-        const categorySelect = document.getElementById('category');
-        const categories = Array.from(categorySelect.options).map(opt => opt.value);
+        function surpriseMe() {
+            const types = ['question', 'phrase'];
+            const categorySelect = document.getElementById('category');
+            const categories = Array.from(categorySelect.options).map(opt => opt.value);
 
-        setTypeSelection(types[Math.floor(Math.random() * types.length)]);
-        const randomCategory = categories[Math.floor(Math.random() * categories.length)];
-        categorySelect.value = randomCategory;
+            setTypeSelection(types[Math.floor(Math.random() * types.length)]);
+            const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+            categorySelect.value = randomCategory;
 
-        generatePrompt();
-    }
-
-    document.querySelectorAll('.type-toggle').forEach((toggle) => {
-        toggle.addEventListener('click', () => {
-            setTypeSelection(toggle.dataset.type);
-        });
-    });
-
-    setTypeSelection('question');
-
-    document.addEventListener('keydown', function (e) {
-        if (e.code === 'Space') {
-            e.preventDefault();
             generatePrompt();
         }
-    });
 
-    function stopTimer() {
-        if (timerInterval) {
-            clearInterval(timerInterval);
-            timerInterval = null;
+        document.querySelectorAll('.type-toggle').forEach((toggle) => {
+            toggle.addEventListener('click', () => {
+                setTypeSelection(toggle.dataset.type);
+            });
+        });
+
+        setTypeSelection('question');
+
+        document.addEventListener('keydown', function (e) {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                generatePrompt();
+            }
+        });
+
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+
+            timerActive = false;
+            timerResetToken += 1;
+            timeLeft = totalTime;
+            updateTimer();
+            clearSteps();
+            hideCompletionCard();
         }
 
-        timerActive = false;
-        timerResetToken += 1;
-        timeLeft = totalTime;
-        updateTimer();
-        clearSteps();
-        hideCompletionCard();
-    }
+        function startTimer() {
+            const promptBox = document.getElementById('prompt');
+            const challengeText = promptBox?.textContent?.trim() || '';
 
-    function startTimer() {
-        const promptBox = document.getElementById('prompt');
-        const challengeText = promptBox?.textContent?.trim() || '';
-
-        if (!challengeText || challengeText.includes('YOUR CHALLENGE')) {
-            return;
-        }
-
-        if (timerInterval) {
-            clearInterval(timerInterval);
-            timerInterval = null;
-        }
-
-        timerResetToken += 1;
-        const thisRun = timerResetToken;
-        timerActive = true;
-        hideCompletionCard();
-        timeLeft = totalTime;
-        updateTimer();
-        clearSteps();
-        enterPresentationMode();
-        playSound('start');
-
-        timerInterval = setInterval(() => {
-            if (!timerActive || thisRun !== timerResetToken) {
+            if (!challengeText || challengeText.includes('YOUR CHALLENGE')) {
                 return;
             }
 
-            timeLeft--;
-            updateTimer();
-            updateGuide();
-
-            if (timeLeft <= 0) {
+            if (timerInterval) {
                 clearInterval(timerInterval);
                 timerInterval = null;
-                if (thisRun === timerResetToken) {
-                    timerFinished();
-                }
             }
-        }, 1000);
-    }
 
-    function updateTimer() {
-        const timer = document.getElementById('timer');
-        if (!timer) return;
+            timerResetToken += 1;
+            const thisRun = timerResetToken;
+            timerActive = true;
+            hideCompletionCard();
+            timeLeft = totalTime;
+            updateTimer();
+            clearSteps();
+            enterPresentationMode();
+            playSound('start');
 
-        let minutes = Math.floor(timeLeft / 60);
-        let seconds = timeLeft % 60;
+            timerInterval = setInterval(() => {
+                if (!timerActive || thisRun !== timerResetToken) {
+                    return;
+                }
 
-        timer.innerHTML = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                timeLeft--;
+                updateTimer();
+                updateGuide();
 
-        const progress = document.getElementById('progress');
-        if (progress) {
-            progress.style.width = (timeLeft / totalTime * 100) + '%';
-        }
-        syncRingProgress();
-    }
-
-    function syncRingProgress() {
-        const progress = document.getElementById('progress');
-        const ring = document.getElementById('ringProgress');
-        if (!progress || !ring) return;
-
-        const value = parseFloat(progress.style.width) || 0;
-        const pct = Math.max(0, Math.min(100, value));
-        const radius = 54;
-        const circumference = 2 * Math.PI * radius;
-        const offset = circumference * (1 - pct / 100);
-        ring.style.strokeDasharray = circumference;
-        ring.style.strokeDashoffset = offset;
-    }
-
-    function updateGuide() {
-        clearSteps();
-
-        if (timeLeft <= 60 && timeLeft >= 50) {
-            activateStep('point');
-        } else if (timeLeft < 50 && timeLeft >= 35) {
-            activateStep('reason');
-        } else if (timeLeft < 35 && timeLeft >= 10) {
-            activateStep('example');
-        } else if (timeLeft < 10) {
-            activateStep('conclusion');
-        }
-    }
-
-    function activateStep(id) {
-        const step = document.getElementById(id);
-        if (step) {
-            step.classList.add('active');
-        }
-    }
-
-    function clearSteps() {
-        const steps = document.querySelectorAll('.step');
-        steps.forEach(step => step.classList.remove('active'));
-    }
-
-    function showCompletionCard() {
-        const card = document.getElementById('completionCard');
-        if (card) {
-            card.classList.add('is-visible');
-        }
-    }
-
-    function hideCompletionCard() {
-        const card = document.getElementById('completionCard');
-        if (card) {
-            card.classList.remove('is-visible');
-        }
-    }
-
-    function timerFinished() {
-        if (!timerActive) {
-            return;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                    if (thisRun === timerResetToken) {
+                        timerFinished();
+                    }
+                }
+            }, 1000);
         }
 
-        clearInterval(timerInterval);
-        timerInterval = null;
-        timerActive = false;
-        timeLeft = 0;
-        updateTimer();
-        clearSteps();
-        const conclusion = document.getElementById('conclusion');
-        if (conclusion) {
-            conclusion.classList.add('active');
+        function updateTimer() {
+            const timer = document.getElementById('timer');
+            if (!timer) return;
+
+            let minutes = Math.floor(timeLeft / 60);
+            let seconds = timeLeft % 60;
+
+            timer.innerHTML = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+            const progress = document.getElementById('progress');
+            if (progress) {
+                progress.style.width = (timeLeft / totalTime * 100) + '%';
+            }
+            syncRingProgress();
         }
-        showCompletionCard();
-        playSound('finish');
-    }
+
+        function syncRingProgress() {
+            const progress = document.getElementById('progress');
+            const ring = document.getElementById('ringProgress');
+            if (!progress || !ring) return;
+
+            const value = parseFloat(progress.style.width) || 0;
+            const pct = Math.max(0, Math.min(100, value));
+            const radius = 54;
+            const circumference = 2 * Math.PI * radius;
+            const offset = circumference * (1 - pct / 100);
+            ring.style.strokeDasharray = circumference;
+            ring.style.strokeDashoffset = offset;
+        }
+
+        function updateGuide() {
+            clearSteps();
+
+            if (timeLeft <= 60 && timeLeft >= 50) {
+                activateStep('point');
+            } else if (timeLeft < 50 && timeLeft >= 35) {
+                activateStep('reason');
+            } else if (timeLeft < 35 && timeLeft >= 10) {
+                activateStep('example');
+            } else if (timeLeft < 10) {
+                activateStep('conclusion');
+            }
+        }
+
+        function activateStep(id) {
+            const step = document.getElementById(id);
+            if (step) {
+                step.classList.add('active');
+            }
+        }
+
+        function clearSteps() {
+            const steps = document.querySelectorAll('.step');
+            steps.forEach(step => step.classList.remove('active'));
+        }
+
+        function showCompletionCard() {
+            const card = document.getElementById('completionCard');
+            if (card) {
+                card.classList.add('is-visible');
+            }
+        }
+
+        function hideCompletionCard() {
+            const card = document.getElementById('completionCard');
+            if (card) {
+                card.classList.remove('is-visible');
+            }
+        }
+
+        function timerFinished() {
+            if (!timerActive) {
+                return;
+            }
+
+            clearInterval(timerInterval);
+            timerInterval = null;
+            timerActive = false;
+            timeLeft = 0;
+            updateTimer();
+            clearSteps();
+            const conclusion = document.getElementById('conclusion');
+            if (conclusion) {
+                conclusion.classList.add('active');
+            }
+            showCompletionCard();
+            playSound('finish');
+        }
     </script>
-    </body>
-    </html>
+</body>
+
+</html>
