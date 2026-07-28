@@ -7,16 +7,18 @@
 <style>
 :root {
     color-scheme: dark;
-    --bg: #080817;
-    --glass: rgba(18, 20, 35, 0.55);
-    --glass-strong: rgba(22, 26, 42, 0.74);
-    --border: rgba(255, 255, 255, 0.08);
+    --bg: #060712;
+    --glass: rgba(10, 14, 28, 0.78);
+    --glass-strong: rgba(14, 19, 35, 0.9);
+    --border: rgba(255, 255, 255, 0.16);
     --text: #F5F7FF;
     --muted: #AAB3D4;
-    --blue: #63A7FF;
-    --purple: #8B7CFF;
-    --cyan: #55E6FF;
-    --magenta: #E77CFF;
+    --blue: #4F72B8;
+    --purple: #5D4CB5;
+    --cyan: #8B51B8;
+    --magenta: #B7568A;
+    --pink: #D37CC0;
+    --lavender: #B37ABF;
 }
 
 * {
@@ -45,23 +47,24 @@ body::after {
     inset: -24%;
     z-index: 0;
     pointer-events: none;
-    filter: blur(280px);
-    opacity: 0.16;
+    filter: blur(260px);
+    opacity: 0.46;
     animation: auroraDrift 34s ease-in-out infinite alternate;
 }
 
 body::before {
-    background: radial-gradient(circle at 18% 18%, rgba(99, 167, 255, 0.22), transparent 34%),
-                radial-gradient(circle at 82% 20%, rgba(139, 124, 255, 0.2), transparent 36%),
-                radial-gradient(circle at 52% 84%, rgba(85, 230, 255, 0.16), transparent 30%),
-                radial-gradient(circle at 32% 74%, rgba(231, 124, 255, 0.16), transparent 24%);
+    background: radial-gradient(ellipse at 18% 20%, rgba(101, 151, 255, 0.34) 0%, rgba(89, 122, 255, 0.12) 24%, transparent 56%),
+                radial-gradient(ellipse at 82% 18%, rgba(139, 90, 255, 0.28) 0%, rgba(92, 71, 194, 0.1) 24%, transparent 54%),
+                radial-gradient(ellipse at 58% 82%, rgba(223, 130, 255, 0.26) 0%, rgba(187, 94, 220, 0.09) 24%, transparent 48%),
+                radial-gradient(ellipse at 42% 62%, rgba(255, 126, 174, 0.24) 0%, rgba(210, 88, 143, 0.08) 24%, transparent 50%);
 }
 
 body::after {
     animation-duration: 40s;
-    background: radial-gradient(circle at 78% 78%, rgba(99, 167, 255, 0.16), transparent 28%),
-                radial-gradient(circle at 20% 80%, rgba(139, 124, 255, 0.18), transparent 34%),
-                radial-gradient(circle at 56% 24%, rgba(85, 230, 255, 0.14), transparent 24%);
+    background: radial-gradient(ellipse at 78% 76%, rgba(89, 184, 255, 0.26) 0%, rgba(55, 111, 212, 0.08) 22%, transparent 46%),
+                radial-gradient(ellipse at 24% 78%, rgba(170, 99, 255, 0.24) 0%, rgba(121, 72, 196, 0.08) 24%, transparent 48%),
+                radial-gradient(ellipse at 54% 24%, rgba(255, 153, 208, 0.22) 0%, rgba(230, 117, 184, 0.07) 24%, transparent 46%),
+                radial-gradient(ellipse at 64% 46%, rgba(104, 214, 255, 0.2) 0%, rgba(70, 140, 196, 0.06) 22%, transparent 44%);
 }
 
 @keyframes auroraDrift {
@@ -83,7 +86,7 @@ body::after {
     background: var(--glass);
     backdrop-filter: blur(26px);
     border: 1px solid var(--border);
-    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.32), 0 0 0 1px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.06);
     overflow: hidden;
     padding: clamp(20px, 2.6vw, 36px);
 }
@@ -114,7 +117,7 @@ body::after {
     border-radius: 50%;
     display: grid;
     place-items: center;
-    background: linear-gradient(135deg, rgba(99, 167, 255, 0.2), rgba(139, 124, 255, 0.2));
+    background: linear-gradient(135deg, rgba(101, 151, 255, 0.3), rgba(223, 130, 255, 0.24));
     border: 1px solid rgba(255, 255, 255, 0.14);
     font-size: 24px;
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
@@ -185,8 +188,37 @@ select option {
 
 select:focus {
     outline: none;
-    border-color: rgba(99, 167, 255, 0.45);
-    box-shadow: 0 0 0 4px rgba(99, 167, 255, 0.12);
+    border-color: rgba(79, 114, 184, 0.28);
+    box-shadow: 0 0 0 4px rgba(79, 114, 184, 0.1);
+}
+
+.type-toggle-group {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    padding: 6px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.type-toggle {
+    width: 100%;
+    min-height: 44px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--muted);
+    font-weight: 600;
+    box-shadow: none;
+    backdrop-filter: none;
+}
+
+.type-toggle.is-active {
+    background: linear-gradient(135deg, rgba(79, 114, 184, 0.34), rgba(93, 76, 181, 0.28));
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.16);
+    box-shadow: 0 8px 20px rgba(79, 114, 184, 0.16);
 }
 
 .actions {
@@ -227,14 +259,14 @@ button:hover {
 }
 
 .generate-btn {
-    background: linear-gradient(135deg, rgba(99, 167, 255, 0.95), rgba(139, 124, 255, 0.92));
+    background: linear-gradient(135deg, rgba(101, 151, 255, 0.88), rgba(223, 130, 255, 0.76));
     color: #fff;
-    box-shadow: 0 18px 40px rgba(99, 167, 255, 0.22);
+    box-shadow: 0 16px 36px rgba(79, 114, 184, 0.16);
     font-weight: 700;
 }
 
 .generate-btn:hover {
-    box-shadow: 0 22px 46px rgba(99, 167, 255, 0.28);
+    box-shadow: 0 20px 42px rgba(79, 114, 184, 0.2);
 }
 
 .start-btn {
@@ -316,11 +348,17 @@ button:hover {
     padding: clamp(16px, 2vw, 24px);
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     opacity: 0;
     pointer-events: none;
     transform: translateY(12px) scale(0.98);
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.presentation-view::-webkit-scrollbar {
+    display: none;
 }
 
 body.presentation-mode .setup-view {
@@ -347,12 +385,16 @@ body.presentation-mode .presentation-view {
     max-width: 760px;
     display: flex;
     flex-direction: column;
-    gap: clamp(18px, 2.4vw, 26px);
+    gap: clamp(16px, 2.2vw, 24px);
     align-items: center;
     text-align: center;
+    justify-content: center;
+    min-height: 100%;
+    padding-block: clamp(12px, 2vw, 20px);
 }
 
 .presentation-challenge {
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -361,10 +403,14 @@ body.presentation-mode .presentation-view {
 
 .presentation-prompt {
     font-family: "Cormorant Garamond", Georgia, serif;
-    font-size: clamp(1.45rem, 3vw, 2.45rem);
-    line-height: 1.2;
+    font-size: clamp(1rem, 2.1vw, 2.1rem);
+    line-height: 1.3;
     color: var(--text);
-    max-width: 640px;
+    max-width: min(100%, 640px);
+    width: 100%;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    hyphens: auto;
 }
 
 .timer-panel {
@@ -404,7 +450,7 @@ body.presentation-mode .presentation-view {
     stroke-dasharray: 339;
     stroke-dashoffset: 339;
     transition: stroke-dashoffset 0.9s linear;
-    filter: drop-shadow(0 0 12px rgba(99, 167, 255, 0.2));
+    filter: drop-shadow(0 0 10px rgba(79, 114, 184, 0.12));
 }
 
 .timer-shell {
@@ -436,9 +482,14 @@ body.presentation-mode .presentation-view {
     flex-direction: column;
     gap: 10px;
     width: min(100%, 520px);
+    flex-shrink: 1;
+    transition: opacity 0.3s ease, transform 0.3s ease, max-height 0.3s ease;
 }
 
 .step {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
     padding: 0.8rem 1rem;
     border-radius: 999px;
     background: rgba(255,255,255,0.04);
@@ -450,25 +501,42 @@ body.presentation-mode .presentation-view {
     backdrop-filter: blur(12px);
 }
 
-.step span {
+.step-indicator {
+    width: 0.86rem;
+    height: 0.86rem;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,0.32);
+    display: inline-block;
+    flex-shrink: 0;
+    transition: all 0.25s ease;
+}
+
+.step-label {
     font-weight: 600;
     color: var(--text);
 }
 
 .active {
-    background: rgba(99, 167, 255, 0.18);
-    border-color: rgba(99, 167, 255, 0.3);
+    background: rgba(79, 114, 184, 0.16);
+    border-color: rgba(79, 114, 184, 0.28);
     transform: translateX(4px);
-    box-shadow: inset 0 0 0 1px rgba(99, 167, 255, 0.16);
+    box-shadow: inset 0 0 0 1px rgba(79, 114, 184, 0.12);
+}
+
+.active .step-indicator {
+    background: linear-gradient(135deg, var(--blue), var(--magenta));
+    border-color: transparent;
+    transform: scale(1.08);
+    box-shadow: 0 0 0 4px rgba(99, 167, 255, 0.12);
 }
 
 .completion-card {
     width: min(100%, 520px);
     padding: 1rem 1.1rem;
     border-radius: 20px;
-    background: linear-gradient(135deg, rgba(99, 167, 255, 0.14), rgba(139, 124, 255, 0.12));
+    background: linear-gradient(135deg, rgba(79, 114, 184, 0.12), rgba(93, 76, 181, 0.09));
     border: 1px solid rgba(255,255,255,0.1);
-    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.2);
     backdrop-filter: blur(16px);
     display: flex;
     flex-direction: column;
@@ -476,13 +544,24 @@ body.presentation-mode .presentation-view {
     opacity: 0;
     transform: translateY(8px);
     pointer-events: none;
+    max-height: 0;
+    overflow: hidden;
     transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .completion-card.is-visible {
     opacity: 1;
     transform: translateY(0);
+    max-height: 200px;
     animation: completionGlow 0.5s ease;
+}
+
+.completion-card.is-visible ~ .guide {
+    opacity: 0;
+    transform: translateY(8px);
+    max-height: 0;
+    overflow: hidden;
+    pointer-events: none;
 }
 
 .completion-title {
@@ -523,8 +602,8 @@ body.presentation-mode .presentation-view {
 }
 
 @keyframes completionGlow {
-    from { box-shadow: 0 0 0 rgba(99, 167, 255, 0.08); }
-    to { box-shadow: 0 18px 42px rgba(0, 0, 0, 0.2); }
+    from { box-shadow: 0 0 0 rgba(79, 114, 184, 0.04); }
+    to { box-shadow: 0 16px 36px rgba(0, 0, 0, 0.2); }
 }
 
 @media (max-width: 760px) {
@@ -566,7 +645,11 @@ body.presentation-mode .presentation-view {
         <div class="controls">
           <div class="field">
             <label>Type</label>
-            <select id="type">
+            <div class="type-toggle-group" role="group" aria-label="Challenge type">
+              <button type="button" class="type-toggle is-active" data-type="question" aria-pressed="true">Question</button>
+              <button type="button" class="type-toggle" data-type="phrase" aria-pressed="false">Word / Phrase</button>
+            </div>
+            <select id="type" hidden>
               <option value="question">Question</option>
               <option value="phrase">Word / Phrase</option>
             </select>
@@ -625,15 +708,16 @@ body.presentation-mode .presentation-view {
             <div class="progress" id="progress"></div>
           </div>
         </div>
-        <div class="guide">
-          <div class="step" id="point"><span>● Point</span></div>
-          <div class="step" id="reason"><span>○ Reason</span></div>
-          <div class="step" id="example"><span>○ Example</span></div>
-          <div class="step" id="conclusion"><span>○ Conclusion</span></div>
-        </div>
         <div class="completion-card" id="completionCard" aria-live="polite">
           <div class="completion-title">🎉 Time is up!</div>
           <div class="completion-copy">Great job practicing your impromptu speech.</div>
+          <div class="completion-copy">Generate another challenge and keep improving.</div>
+        </div>
+        <div class="guide">
+          <div class="step" id="point"><span class="step-indicator"></span><span class="step-label">Point</span></div>
+          <div class="step" id="reason"><span class="step-indicator"></span><span class="step-label">Reason</span></div>
+          <div class="step" id="example"><span class="step-indicator"></span><span class="step-label">Example</span></div>
+          <div class="step" id="conclusion"><span class="step-indicator"></span><span class="step-label">Conclusion</span></div>
         </div>
       </div>
     </section>
@@ -696,6 +780,19 @@ function setStartButtonVisibility(visible) {
     button.classList.toggle('is-visible', visible);
     button.classList.toggle('is-hidden', !visible);
     button.setAttribute('aria-hidden', visible ? 'false' : 'true');
+}
+
+function setTypeSelection(value) {
+    const typeSelect = document.getElementById('type');
+    const toggles = document.querySelectorAll('.type-toggle');
+    if (!typeSelect) return;
+
+    typeSelect.value = value;
+    toggles.forEach((toggle) => {
+        const isActive = toggle.dataset.type === value;
+        toggle.classList.toggle('is-active', isActive);
+        toggle.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+    });
 }
 
 function animatePromptBox() {
@@ -831,16 +928,23 @@ function exitPresentationMode() {
 
 function surpriseMe() {
     const types = ['question', 'phrase'];
-    const typeSelect = document.getElementById('type');
     const categorySelect = document.getElementById('category');
     const categories = Array.from(categorySelect.options).map(opt => opt.value);
 
-    typeSelect.value = types[Math.floor(Math.random() * types.length)];
+    setTypeSelection(types[Math.floor(Math.random() * types.length)]);
     const randomCategory = categories[Math.floor(Math.random() * categories.length)];
     categorySelect.value = randomCategory;
 
     generatePrompt();
 }
+
+document.querySelectorAll('.type-toggle').forEach((toggle) => {
+    toggle.addEventListener('click', () => {
+        setTypeSelection(toggle.dataset.type);
+    });
+});
+
+setTypeSelection('question');
 
 document.addEventListener('keydown', function (e) {
     if (e.code === 'Space') {
