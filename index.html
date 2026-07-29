@@ -336,6 +336,37 @@
             backdrop-filter: blur(16px);
         }
 
+        .rate-limit-notice {
+            margin-top: 12px;
+            padding: 1rem;
+            border-radius: 16px;
+            background: rgba(215, 90, 90, 0.08);
+            border: 1px solid rgba(215, 90, 90, 0.25);
+            text-align: center;
+        }
+
+        .rate-limit-text {
+            color: var(--text);
+            font-size: 0.9rem;
+            margin-bottom: 0.8rem;
+            line-height: 1.4;
+        }
+
+        .rate-limit-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .fallback-yes-btn {
+            background: linear-gradient(135deg, rgba(101, 151, 255, 0.85), rgba(223, 130, 255, 0.7));
+            color: #fff;
+        }
+
+        .fallback-no-btn {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
         .prompt-box.is-animating {
             animation: challengeReveal 0.45s cubic-bezier(0.22, 1, 0.36, 1);
         }
@@ -381,9 +412,12 @@
 
         .close-btn {
             position: absolute;
-            top: clamp(14px, 2vw, 22px);
-            right: clamp(14px, 2vw, 22px);
-            z-index: 3;
+            top: 16px;
+            right: 16px;
+            z-index: 100;
+
+            width: 40px;
+            height: 40px;
         }
 
         .presentation-inner {
@@ -640,6 +674,7 @@
         @media (max-width: 760px) {
             .app-card {
                 min-height: auto;
+                position: relative;
             }
 
             .controls {
@@ -719,6 +754,22 @@
                 font-size: 2rem;
             }
         }
+
+        body.generating .controls,
+        body.generating .actions,
+        body.generating .challenge-actions {
+            pointer-events: none;
+        }
+
+        body.generating button,
+        body.generating select {
+            cursor: wait;
+        }
+
+        body.generating .generate-btn {
+            opacity: .85;
+        }
+
     </style>
 </head>
 
@@ -773,6 +824,15 @@
                         <div class="prompt-box" id="prompt">
                             <div class="placeholder">YOUR CHALLENGE</div>
                         </div>
+                        <div class="rate-limit-notice" id="rateLimitNotice" style="display:none;">
+                            <p class="rate-limit-text">Daily AI generation limit reached. Would you like to use offline
+                                practice questions instead?</p>
+                            <div class="rate-limit-actions">
+                                <button class="fallback-yes-btn" onclick="confirmFallback(true)">Use Offline
+                                    Questions</button>
+                                <button class="fallback-no-btn" onclick="confirmFallback(false)">Cancel</button>
+                            </div>
+                        </div>
                         <div class="challenge-actions">
                             <button class="start-btn is-hidden" id="startBtn" onclick="startTimer()">Start 1-Minute
                                 Round</button>
@@ -826,13 +886,12 @@
     <script>
         const WORKER_URL = "https://think-quick.amberprincessrosana.workers.dev/";
         const MODEL = "nvidia/nemotron-3-super-120b-a12b:free";
-        const soundFiles = {
-            generate: 'sounds/generate.mp3',
-            start: 'sounds/start.mp3',
-            finish: 'sounds/finish.mp3'
+        const soundPlayers = {
+            generate: document.getElementById("generateSound"),
+            start: document.getElementById("startSound"),
+            finish: document.getElementById("finishSound")
         };
-        const soundPlayers = {};
-        let soundLock = false;
+
         let audioUnlocked = false;
 
         document.addEventListener("click", () => {
@@ -861,203 +920,467 @@
         const promptPool = {
             technology: {
                 questions: [
+                    "How has smartphone use changed the way people spend their free time?",
+                    "What is one piece of technology you could not live without?",
+                    "How might artificial intelligence change everyday jobs in the next ten years?",
+                    "Is social media making people more connected or more isolated?",
+                    "What technology from science fiction do you wish already existed?",
+                    "How has technology changed the way students learn?",
+                    "What are the benefits and drawbacks of working from home?",
+                    "How do you think self-driving cars will change cities?",
+                    "What responsibility do tech companies have to protect user privacy?",
+                    "How has streaming changed the way people watch movies and shows?",
+                    "What is one app that has genuinely improved your daily life?",
+                    "How might virtual reality change the way people travel?",
+                    "Do you think robots will ever fully replace human workers?",
+                    "What is the biggest downside of constant internet connectivity?",
+                    "How has technology changed the way families stay in touch?",
+                    "What role should schools play in teaching digital literacy?",
+                    "How do you think wearable technology will evolve in the future?",
+                    "What is one old technology you think should make a comeback?",
+                    "How has online shopping changed the retail experience?",
+                    "What ethical questions come up when discussing artificial intelligence?"
                 ],
                 words: [
-                    "automation",
-                    "innovation",
-                    "platform"
+                    "automation", "innovation", "platform", "algorithm", "bandwidth",
+                    "cybersecurity", "interface", "upgrade", "network", "prototype",
+                    "streaming", "wearable", "cloud storage", "biometric", "firmware",
+                    "encryption", "chatbot", "smartwatch", "hologram", "software"
                 ],
                 phrases: [
-                    "future of work",
-                    "digital identity",
-                    "smart living"
+                    "future of work", "digital identity", "smart living", "artificial intelligence",
+                    "data privacy", "virtual reality", "internet of things", "screen time",
+                    "remote collaboration", "digital detox", "online security", "connected world",
+                    "self-driving cars", "smart home", "tech addiction", "cloud computing",
+                    "wearable devices", "social media influence", "digital footprint", "next generation tech"
                 ]
             },
             science: {
                 questions: [
                     "What is one scientific idea that changed the way people think about the world?",
                     "How might space travel become more common in the future?",
-                    "Why is curiosity important in science?"
+                    "Why is curiosity important in science?",
+                    "What scientific discovery do you find most fascinating?",
+                    "How do you think climate science will shape policy decisions?",
+                    "Why do people sometimes distrust scientific findings?",
+                    "What is one everyday phenomenon that seems ordinary but is actually complex?",
+                    "How has vaccine science changed the way we handle disease outbreaks?",
+                    "What role does failure play in scientific discovery?",
+                    "Do you think we will find life on another planet in your lifetime?",
+                    "How does studying the ocean help us understand the planet?",
+                    "What is the value of teaching science to young children?",
+                    "How might genetic research change medicine in the future?",
+                    "Why do some scientific breakthroughs take decades to be accepted?",
+                    "What is one experiment you wish you could conduct?",
+                    "How does science help us make better decisions in daily life?",
+                    "What is the importance of peer review in scientific research?",
+                    "How might renewable energy research change the next decade?",
+                    "Why is biodiversity important to scientific study?",
+                    "What is one myth about science you wish more people understood?"
                 ],
                 words: [
-                    "discovery",
-                    "experiment",
-                    "evolution"
+                    "discovery", "experiment", "evolution", "hypothesis", "gravity",
+                    "ecosystem", "molecule", "energy", "genome", "microscope",
+                    "laboratory", "chemical reaction", "theory", "observation", "research",
+                    "atom", "photosynthesis", "vaccine", "telescope", "biology"
                 ],
                 phrases: [
-                    "natural balance",
-                    "human curiosity",
-                    "scientific method"
+                    "natural balance", "human curiosity", "scientific method", "climate change",
+                    "space exploration", "renewable energy", "genetic engineering", "trial and error",
+                    "evidence-based thinking", "the power of observation", "unlocking mysteries",
+                    "scientific breakthrough", "the search for life", "data-driven discovery",
+                    "questioning assumptions", "the pursuit of knowledge", "nature versus nurture",
+                    "the scientific process", "innovation through research", "understanding the universe"
                 ]
             },
             nature: {
                 questions: [
                     "Why do people often feel calmer when they spend time outdoors?",
                     "What might happen if one species disappears from an ecosystem?",
-                    "How does nature inspire creativity?"
+                    "How does nature inspire creativity?",
+                    "What is one natural place you would love to visit and why?",
+                    "How can cities do a better job of protecting green spaces?",
+                    "Why do you think people are drawn to watching sunsets?",
+                    "How does spending time in nature affect mental health?",
+                    "What is one small change people can make to help the environment?",
+                    "Why is it important to protect endangered animals?",
+                    "How do seasons affect the way people feel and behave?",
+                    "What can we learn from how animals adapt to their environments?",
+                    "How does gardening change a person's relationship with food?",
+                    "Why do storms and natural disasters fascinate people?",
+                    "What is one way nature has surprised you?",
+                    "How might future generations experience nature differently than we do?",
+                    "Why do forests matter beyond providing oxygen?",
+                    "What responsibility do individuals have toward environmental conservation?",
+                    "How does living near water affect a community's lifestyle?",
+                    "Why do people often romanticize wilderness and untouched land?",
+                    "What is the relationship between weather and human mood?"
                 ],
                 words: [
-                    "ecosystem",
-                    "renewal",
-                    "wildlife"
+                    "ecosystem", "renewal", "wildlife", "rainforest", "biodiversity",
+                    "migration", "habitat", "conservation", "drought", "canopy",
+                    "coral reef", "erosion", "pollination", "wilderness", "monsoon",
+                    "sustainability", "glacier", "predator", "sanctuary", "photosynthesis"
                 ],
                 phrases: [
-                    "season of change",
-                    "living in harmony",
-                    "the power of rain"
+                    "season of change", "living in harmony", "the power of rain",
+                    "natural wonders", "protecting wildlife", "climate resilience",
+                    "the balance of nature", "return to the wild", "earth's fragile beauty",
+                    "conservation efforts", "the great outdoors", "nature's resilience",
+                    "environmental responsibility", "wild and untouched", "the changing seasons",
+                    "life in the wild", "harmony with the earth", "restoring ecosystems",
+                    "the call of the ocean", "green spaces matter"
                 ]
             },
             philosophy: {
                 questions: [
                     "What makes a good life meaningful?",
                     "Is it easier to follow your heart or your mind?",
-                    "Why do people ask big questions even when they may never find perfect answers?"
+                    "Why do people ask big questions even when they may never find perfect answers?",
+                    "What does true happiness mean to you?",
+                    "Is it more important to be right or to be kind?",
+                    "Do people have control over their own fate, or is life mostly chance?",
+                    "What does it mean to live authentically?",
+                    "Why do people fear uncertainty so much?",
+                    "Is it possible to be completely honest with yourself?",
+                    "What responsibility do we have to future generations?",
+                    "Can someone be truly free without any rules or structure?",
+                    "What is the difference between knowledge and wisdom?",
+                    "Why do people struggle to accept change?",
+                    "Is morality something we are born with or something we learn?",
+                    "What does it mean to forgive someone completely?",
+                    "Do material things actually make people happier?",
+                    "Why do people often regret inaction more than mistakes?",
+                    "What is the value of struggle in shaping character?",
+                    "Can two people ever truly understand each other's perspective?",
+                    "What does it mean to live with integrity?"
                 ],
                 words: [
-                    "purpose",
-                    "reflection",
-                    "ethics"
+                    "purpose", "reflection", "ethics", "existence", "morality",
+                    "consciousness", "identity", "truth", "wisdom", "virtue",
+                    "freedom", "meaning", "perception", "belief", "reasoning",
+                    "authenticity", "mortality", "justice", "conscience", "intuition"
                 ],
                 phrases: [
-                    "the meaning of success",
-                    "a life of values",
-                    "questions that matter"
+                    "the meaning of success", "a life of values", "questions that matter",
+                    "the pursuit of happiness", "living authentically", "the nature of truth",
+                    "freedom versus responsibility", "the weight of choice", "finding inner peace",
+                    "moral responsibility", "the examined life", "balancing logic and emotion",
+                    "the search for meaning", "embracing uncertainty", "the value of struggle",
+                    "living with integrity", "the power of perspective", "questioning assumptions",
+                    "the good life", "understanding human nature"
                 ]
             },
             education: {
                 questions: [
                     "What makes a teacher memorable?",
                     "Why is learning something new often uncomfortable at first?",
-                    "How can schools help students become more confident?"
+                    "How can schools help students become more confident?",
+                    "What is one subject you wish schools taught but currently do not?",
+                    "How does failure play a role in the learning process?",
+                    "Why do some students thrive under pressure while others struggle?",
+                    "What is the value of learning outside of a classroom?",
+                    "How can technology improve or harm the learning experience?",
+                    "What is one lesson you learned outside of school that changed you?",
+                    "Why is it important to learn how to learn, not just facts?",
+                    "How does a good mentor shape someone's future?",
+                    "What role should creativity play in education?",
+                    "Why do some people continue learning long after school ends?",
+                    "How can schools better prepare students for real life?",
+                    "What is the difference between memorizing and truly understanding?",
+                    "How does group learning compare to learning alone?",
+                    "Why is early childhood education so important?",
+                    "What is one skill schools should prioritize teaching?",
+                    "How does curiosity drive lifelong learning?",
+                    "What makes a classroom feel like a safe space to learn?"
                 ],
                 words: [
-                    "curiosity",
-                    "discipline",
-                    "knowledge"
+                    "curiosity", "discipline", "knowledge", "mentorship", "literacy",
+                    "curriculum", "creativity", "feedback", "comprehension", "collaboration",
+                    "critical thinking", "perseverance", "classroom", "scholarship", "tutoring",
+                    "assessment", "lifelong learning", "engagement", "self-study", "growth"
                 ],
                 phrases: [
-                    "learning by doing",
-                    "skills for life",
-                    "growth mindset"
+                    "learning by doing", "skills for life", "growth mindset",
+                    "the power of curiosity", "lifelong learning", "learning from failure",
+                    "education for all", "critical thinking skills", "the value of mentorship",
+                    "unlocking potential", "hands-on learning", "building confidence",
+                    "student-centered learning", "the joy of discovery", "beyond the classroom",
+                    "shaping young minds", "practical knowledge", "the foundation of success",
+                    "learning through experience", "education as empowerment"
                 ]
             },
             lifestyle: {
                 questions: [
                     "How can a daily routine improve your mood?",
                     "What is one habit that helps people feel more balanced?",
-                    "Why do small changes sometimes create a big difference?"
+                    "Why do small changes sometimes create a big difference?",
+                    "What does a balanced lifestyle look like to you?",
+                    "How does simplifying your schedule improve your wellbeing?",
+                    "What is one habit you would like to build this year?",
+                    "How does spending time alone benefit a person?",
+                    "Why do people struggle to maintain healthy habits?",
+                    "What role does rest play in productivity?",
+                    "How can someone build a morning routine that actually sticks?",
+                    "What is the value of unplugging from technology occasionally?",
+                    "How does minimalism affect the way people live?",
+                    "Why is work-life balance important for long-term happiness?",
+                    "What is one small ritual that brings you joy?",
+                    "How does clutter affect a person's mental state?",
+                    "What does self-care mean to you personally?",
+                    "How can travel change the way a person sees the world?",
+                    "Why do people often resist changing their daily habits?",
+                    "What is the relationship between sleep and daily performance?",
+                    "How does gratitude practice affect overall happiness?"
                 ],
                 words: [
-                    "balance",
-                    "wellness",
-                    "routine"
+                    "balance", "wellness", "routine", "mindfulness", "simplicity",
+                    "self-care", "minimalism", "gratitude", "consistency", "leisure",
+                    "productivity", "relaxation", "hobby", "wellbeing", "intentionality",
+                    "downtime", "habit", "contentment", "moderation", "vitality"
                 ],
                 phrases: [
-                    "slow living",
-                    "daily habits",
-                    "mindful choices"
+                    "slow living", "daily habits", "mindful choices",
+                    "work-life balance", "the art of simplicity", "self-care matters",
+                    "building better habits", "finding your rhythm", "living intentionally",
+                    "unplugging to recharge", "small daily wins", "a balanced life",
+                    "the value of routine", "mindful mornings", "less but better",
+                    "quality over quantity", "living in the moment", "the power of rest",
+                    "healthy boundaries", "everyday gratitude"
                 ]
             },
             business: {
                 questions: [
                     "What makes a team work well together?",
                     "Why do some ideas become successful while others fade away?",
-                    "How can a leader build trust?"
+                    "How can a leader build trust?",
+                    "What is the most important quality in a good business partner?",
+                    "How does failure shape successful entrepreneurs?",
+                    "Why do some companies prioritize culture over profit?",
+                    "What is one business idea you think could genuinely succeed?",
+                    "How important is adaptability in today's business world?",
+                    "What separates a good leader from a great one?",
+                    "Why do some brands build stronger customer loyalty than others?",
+                    "How does risk-taking play a role in entrepreneurship?",
+                    "What is the value of mentorship in a professional career?",
+                    "How should companies balance profit with social responsibility?",
+                    "What is one skill every entrepreneur should have?",
+                    "How does competition push companies to improve?",
+                    "Why do some startups fail even with great ideas?",
+                    "What role does communication play in effective leadership?",
+                    "How important is company culture to employee satisfaction?",
+                    "What is the biggest challenge facing small businesses today?",
+                    "How does innovation drive long-term business success?"
                 ],
                 words: [
-                    "strategy",
-                    "vision",
-                    "growth"
+                    "strategy", "vision", "growth", "leadership", "negotiation",
+                    "innovation", "entrepreneurship", "investment", "branding", "efficiency",
+                    "collaboration", "risk", "profit", "networking", "marketing",
+                    "productivity", "startup", "resilience", "adaptability", "teamwork"
                 ],
                 phrases: [
-                    "building momentum",
-                    "smart decision making",
-                    "creative leadership"
+                    "building momentum", "smart decision making", "creative leadership",
+                    "the entrepreneurial mindset", "risk versus reward", "building trust",
+                    "long-term vision", "adapting to change", "customer-first thinking",
+                    "sustainable growth", "the power of teamwork", "calculated risk-taking",
+                    "leading by example", "innovation drives growth", "building a strong brand",
+                    "strategic decision-making", "the value of persistence", "turning ideas into action",
+                    "workplace culture", "scaling a business"
                 ]
             },
             history: {
                 questions: [
                     "What can people learn from the mistakes of the past?",
                     "Why do certain historical events still shape the present?",
-                    "How do stories from history help people understand change?"
+                    "How do stories from history help people understand change?",
+                    "What historical figure do you find most inspiring and why?",
+                    "How does understanding history help prevent repeating mistakes?",
+                    "Why do some historical events get remembered while others are forgotten?",
+                    "What is one historical event you wish you could witness?",
+                    "How does studying history shape a person's worldview?",
+                    "Why is it important to preserve historical landmarks?",
+                    "What lessons from past leaders still apply to today's world?",
+                    "How has the way we record history changed over time?",
+                    "Why do people romanticize certain periods of the past?",
+                    "What historical invention changed the world the most?",
+                    "How do different cultures interpret the same historical events differently?",
+                    "Why is it valuable to learn about difficult chapters in history?",
+                    "What role does oral tradition play in preserving history?",
+                    "How has technology changed the way historians study the past?",
+                    "What historical movement do you think had the biggest impact?",
+                    "Why do people often overlook everyday history in favor of major events?",
+                    "How does history shape a nation's identity?"
                 ],
                 words: [
-                    "legacy",
-                    "tradition",
-                    "memory"
+                    "legacy", "tradition", "memory", "heritage", "revolution",
+                    "monument", "archive", "civilization", "empire", "artifact",
+                    "chronicle", "ancestry", "milestone", "era", "documentation",
+                    "reform", "dynasty", "resistance", "preservation", "narrative"
                 ],
                 phrases: [
-                    "lessons from the past",
-                    "the weight of history",
-                    "voices of time"
+                    "lessons from the past", "the weight of history", "voices of time",
+                    "learning from mistakes", "preserving our heritage", "shaping the future",
+                    "echoes of the past", "history repeating itself", "the power of memory",
+                    "rewriting the narrative", "forgotten stories", "turning points in history",
+                    "the march of progress", "cultural preservation", "lessons in leadership",
+                    "history's hidden stories", "the price of progress", "honoring the past",
+                    "understanding our roots", "the long arc of change"
                 ]
             },
             psychology: {
                 questions: [
                     "Why do people sometimes judge themselves too harshly?",
                     "How does confidence change the way people speak and act?",
-                    "What helps someone recover after a setback?"
+                    "What helps someone recover after a setback?",
+                    "Why do people often compare themselves to others?",
+                    "How does stress affect the way people make decisions?",
+                    "What is the relationship between habits and identity?",
+                    "Why do people fear failure more than they value success?",
+                    "How does positive self-talk affect daily performance?",
+                    "What role does empathy play in building strong relationships?",
+                    "Why do people sometimes resist asking for help?",
+                    "How does childhood experience shape adult behavior?",
+                    "What is the connection between mindset and motivation?",
+                    "Why do people often avoid uncomfortable emotions?",
+                    "How does social pressure influence personal decisions?",
+                    "What helps build genuine self-confidence over time?",
+                    "Why do people sometimes sabotage their own success?",
+                    "How does gratitude affect overall mental wellbeing?",
+                    "What role does vulnerability play in building trust?",
+                    "Why is self-awareness important for personal growth?",
+                    "How does resilience develop after difficult experiences?"
                 ],
                 words: [
-                    "focus",
-                    "resilience",
-                    "identity"
+                    "focus", "resilience", "identity", "motivation", "empathy",
+                    "self-awareness", "confidence", "perception", "mindset", "behavior",
+                    "emotion", "cognition", "vulnerability", "self-esteem", "anxiety",
+                    "wellbeing", "reflection", "growth", "trust", "perspective"
                 ],
                 phrases: [
-                    "inner confidence",
-                    "healthy mindset",
-                    "emotional strength"
+                    "inner confidence", "healthy mindset", "emotional strength",
+                    "the power of self-belief", "overcoming self-doubt", "building resilience",
+                    "emotional intelligence", "the growth mindset", "self-awareness matters",
+                    "finding inner peace", "breaking negative patterns", "the science of motivation",
+                    "understanding human behavior", "healing from setbacks", "the confidence to speak up",
+                    "mental clarity", "the courage to be vulnerable", "positive self-talk",
+                    "coping with pressure", "personal transformation"
                 ]
             },
             entertainment: {
                 questions: [
                     "Why do certain stories stay with people for years?",
                     "What makes a performance feel memorable?",
-                    "How does humor help people connect?"
+                    "How does humor help people connect?",
+                    "What is one movie or show that changed how you see the world?",
+                    "How does music influence a person's mood?",
+                    "Why do people enjoy stories with unexpected endings?",
+                    "What makes a fictional character feel believable?",
+                    "How has streaming changed the way people experience entertainment?",
+                    "Why do some songs stay popular for decades while others fade quickly?",
+                    "What role does storytelling play in shaping culture?",
+                    "How does live performance differ from watching something recorded?",
+                    "Why do people enjoy rewatching their favorite movies or shows?",
+                    "What makes comedy such a powerful tool for connection?",
+                    "How does entertainment reflect the values of a society?",
+                    "Why do people form strong emotional attachments to fictional characters?",
+                    "What is the value of storytelling across different cultures?",
+                    "How has social media changed the way entertainment spreads?",
+                    "Why do people enjoy live music despite recorded alternatives?",
+                    "What makes a good plot twist actually work?",
+                    "How does entertainment help people process difficult emotions?"
                 ],
                 words: [
-                    "storytelling",
-                    "imagination",
-                    "performance"
+                    "storytelling", "imagination", "performance", "narrative", "melody",
+                    "cinematography", "improvisation", "spotlight", "rhythm", "audience",
+                    "screenplay", "choreography", "soundtrack", "character", "suspense",
+                    "comedy", "drama", "creativity", "premiere", "artistry"
                 ],
                 phrases: [
-                    "shared laughter",
-                    "captivating stories",
-                    "creative expression"
+                    "shared laughter", "captivating stories", "creative expression",
+                    "the magic of storytelling", "larger than life", "behind the scenes",
+                    "the power of music", "unforgettable performances", "the art of comedy",
+                    "stories that connect us", "escaping into fiction", "the rhythm of life",
+                    "cultural storytelling", "the emotional power of film", "live in the moment",
+                    "the craft of acting", "entertainment as escape", "stories worth telling",
+                    "the soundtrack of life", "creativity on display"
                 ]
             },
             sports: {
                 questions: [
                     "What does teamwork teach people outside of sports?",
                     "Why do athletes often learn discipline from their training?",
-                    "How can pressure make a person stronger?"
+                    "How can pressure make a person stronger?",
+                    "What is the value of losing in developing character?",
+                    "How does sportsmanship shape a person's integrity?",
+                    "Why do underdog stories in sports resonate with so many people?",
+                    "What role does mental toughness play in athletic performance?",
+                    "How does teamwork translate into success outside of sports?",
+                    "Why do people find so much meaning in watching live sports?",
+                    "What can leadership on a sports team teach us about leadership in life?",
+                    "How does consistent practice lead to mastery in any skill?",
+                    "Why is it important for athletes to learn to handle failure?",
+                    "What is the relationship between physical fitness and mental health?",
+                    "How does competition push people to improve themselves?",
+                    "Why do rivalries make sports more exciting for fans?",
+                    "What does it take to bounce back after a tough loss?",
+                    "How does discipline in training translate into other areas of life?",
+                    "Why do team sports build stronger social bonds than individual ones?",
+                    "What role does coaching play in an athlete's development?",
+                    "How does setting goals improve athletic performance?"
                 ],
                 words: [
-                    "discipline",
-                    "endurance",
-                    "momentum"
+                    "discipline", "endurance", "momentum", "teamwork", "resilience",
+                    "competition", "strategy", "sportsmanship", "training", "victory",
+                    "perseverance", "coordination", "stamina", "focus", "coaching",
+                    "rivalry", "athleticism", "determination", "fitness", "mastery"
                 ],
                 phrases: [
-                    "the power of practice",
-                    "a winning mindset",
-                    "team spirit"
+                    "the power of practice", "a winning mindset", "team spirit",
+                    "the thrill of competition", "overcoming the odds", "mental toughness",
+                    "the value of teamwork", "training for greatness", "the discipline of sport",
+                    "rising after defeat", "the drive to win", "building a champion mindset",
+                    "sportsmanship matters", "pushing your limits", "the power of persistence",
+                    "leadership on the field", "the joy of the game", "goals worth chasing",
+                    "the underdog story", "strength through struggle"
                 ]
             },
             general: {
                 questions: [
                     "What is one thing you would like to understand better?",
                     "Why do people enjoy sharing their opinions?",
-                    "What helps someone speak with confidence?"
+                    "What helps someone speak with confidence?",
+                    "What is one small act of kindness that made a big impact on you?",
+                    "How do you handle disagreements with people you care about?",
+                    "What is one skill you wish more people had?",
+                    "How do you stay motivated when things get difficult?",
+                    "What does being a good friend mean to you?",
+                    "How do you decide what is truly important in life?",
+                    "What is one piece of advice you would give your younger self?",
+                    "How do you handle criticism from others?",
+                    "What is the value of stepping outside your comfort zone?",
+                    "How do you define success in your own life?",
+                    "What is one habit that has genuinely improved your life?",
+                    "How do you stay calm during stressful situations?",
+                    "What is something you have changed your mind about recently?",
+                    "How do you approach making difficult decisions?",
+                    "What is one thing you are genuinely grateful for today?",
+                    "How do you recharge after a long or difficult day?",
+                    "What does personal growth look like for you?"
                 ],
                 words: [
-                    "clarity",
-                    "courage",
-                    "focus"
+                    "clarity", "courage", "focus", "gratitude", "perseverance",
+                    "confidence", "kindness", "patience", "curiosity", "honesty",
+                    "adaptability", "empathy", "resilience", "creativity", "integrity",
+                    "motivation", "balance", "growth", "positivity", "authenticity"
                 ],
                 phrases: [
-                    "finding your voice",
-                    "thinking on your feet",
-                    "shaping an idea"
+                    "finding your voice", "thinking on your feet", "shaping an idea",
+                    "small acts of kindness", "the courage to speak up", "embracing change",
+                    "the value of patience", "staying true to yourself", "learning from mistakes",
+                    "the power of gratitude", "stepping outside your comfort zone", "everyday courage",
+                    "finding your own path", "the strength of honesty", "believing in yourself",
+                    "growing through challenges", "the importance of perspective", "living with purpose",
+                    "the art of listening", "quiet confidence"
                 ]
             }
         };
@@ -1119,6 +1442,10 @@
             return normalized;
         }
 
+        function canonicalKey(str) {
+            return String(str).trim().toLowerCase().replace(/[.?!]+$/, '');
+        }
+
         function getPromptCacheEntry(cache, category, type) {
             const normalizedCategory = normalizeCategory(category);
             const normalizedType = type === 'question' ? 'question' : 'phrase';
@@ -1146,8 +1473,17 @@
             const usedPrompts = Array.isArray(entry.used) ? entry.used : [];
             const remainingPrompts = Array.isArray(entry.remaining) ? entry.remaining : [];
 
+            const usedKeys = new Set(usedPrompts.map(canonicalKey));
             const combinedPrompts = [...remainingPrompts, ...normalizedPrompts];
-            const filteredPrompts = normalizePromptBatch(combinedPrompts).filter((prompt) => !usedPrompts.includes(prompt));
+
+            const seenKeys = new Set();
+            const filteredPrompts = [];
+            for (const prompt of combinedPrompts) {
+                const key = canonicalKey(prompt);
+                if (usedKeys.has(key) || seenKeys.has(key)) continue;
+                seenKeys.add(key);
+                filteredPrompts.push(prompt);
+            }
 
             entry.remaining = filteredPrompts;
             entry.used = usedPrompts;
@@ -1307,43 +1643,99 @@
         // ================================
         // AI GENERATION
         // ================================
-        function parsePromptBatchResponse(content) {
+        function parsePromptBatchResponse(content, expectedCount = 10) {
             if (typeof content !== 'string') return null;
 
             let normalized = content.trim();
             const fencedMatch = normalized.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
-
             if (fencedMatch) {
                 normalized = fencedMatch[1].trim();
             }
 
-            const jsonStart = normalized.indexOf('[');
-            const jsonEnd = normalized.lastIndexOf(']');
+            const minAcceptable = Math.max(3, Math.floor(expectedCount / 2));
+            const ALL_CATEGORIES = [
+                'technology', 'science', 'nature', 'philosophy', 'education',
+                'lifestyle', 'business', 'history', 'psychology', 'entertainment',
+                'sports', 'general'
+            ];
 
-            if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
-                normalized = normalized.slice(jsonStart, jsonEnd + 1);
-            }
+            // The model may write reasoning text containing a fake example array
+            // BEFORE the real answer. Scan every bracket block and keep the best one.
+            const candidates = normalized.match(/\[[\s\S]*?\]/g) || [];
 
-            try {
-                const parsed = JSON.parse(normalized);
-                if (!Array.isArray(parsed)) {
-                    return null;
+            let best = null;
+
+            for (const candidate of candidates) {
+                try {
+                    const parsed = JSON.parse(candidate);
+                    if (!Array.isArray(parsed)) continue;
+                    const clean = normalizePromptBatch(parsed).filter(isRealItem).filter(item => !ALL_CATEGORIES.includes(item.trim().toLowerCase()));                    if (clean.length < minAcceptable) continue;
+                    // Prefer whichever candidate is closest to the expected count,
+                    // and prefer later candidates on ties (real answer usually comes last)
+                    if (!best || Math.abs(clean.length - expectedCount) <= Math.abs(best.length - expectedCount)) {
+                        best = clean;
+                    }
+                } catch (err) {
+                    continue;
                 }
-
-                return normalizePromptBatch(parsed);
-            } catch (err) {
-                return null;
             }
+
+            if (best) return best;
+
+            // Fallback: salvage quoted strings from the whole content, last resort
+            const matches = normalized.match(/"((?:[^"\\]|\\.)*)"/g);
+            if (!matches) return null;
+
+            const salvaged = matches
+                .map(m => m.slice(1, -1).replace(/\\"/g, '"'))
+                .filter(s => s.trim().length > 0);
+
+            const clean = normalizePromptBatch(salvaged).filter(isRealItem).filter(item => !ALL_CATEGORIES.includes(item.trim().toLowerCase()));            return clean.length >= minAcceptable ? clean : null;
         }
+        function isRealItem(item) {
+            const placeholderPattern = /^(question|item|word|phrase|example)\s*\d*$/i;
+            return !placeholderPattern.test(item.trim());
+        }
+
+        const QUESTION_BATCH_SIZE = 10;
+        const PHRASE_BATCH_SIZE = 10;
 
         async function generateAI(type, category) {
             console.log('generateAI called with', { type, category });
 
             let instruction;
             if (type === 'question') {
-                instruction = `Generate exactly 20 unique impromptu speaking questions.\n\nCategory:\n${category}\n\nRules:\n- One sentence each\n- Suitable for students\n- Good for a 1-minute speech\n- No explanations\n- No numbering\n- Return ONLY a JSON array`;
-            } else {
-                instruction = `Generate exactly 20 unique speaking practice words or phrases.\n\nCategory:\n${category}\n\nRules:\n- 1 to 3 words only\n- No explanations\n- No quotation marks\n- Return ONLY a JSON array`;
+                instruction = `
+                
+                - Do not think out loud, do not explain, do not show reasoning
+                - Output ONLY a JSON array of exactly ${QUESTION_BATCH_SIZE} unique impromptu speaking questions 9sentence) about "${category}".
+
+                STRICT FORMAT RULES:
+                
+                - Your entire response must be a single JSON array, nothing else
+                - Do not write anything before the array or after it
+                - No numbering, no markdown, no code fences
+                - Each item is one sentence, suitable for a student giving a 1-minute speech
+                - Response must start with [ and end with ]
+                - Enclose each sentence with quoation marks
+
+                Example format: ["What is one way technology has changed daily life?", "How might renewable energy shape the next decade?"]`;
+            }   
+            else {
+                instruction = `
+                
+                - Do not think out loud, do not explain, do not show reasoning
+                - Output ONLY a JSON array of exactly ${PHRASE_BATCH_SIZE} unique short speaking-practice words or phrases about "${category}".
+
+                STRICT FORMAT RULES:
+                - Your entire response must be a single JSON array, nothing else
+                - Do not write anything before the array or after it
+                - No numbering, no markdown, no code fences, no quotation marks inside items
+                - Each item is 1 to 3 words
+                - Response must start with [ and end with ]
+                - enclose each word or phrase with quotation marks
+
+                Example format: ["innovation", "digital identity", "future of work"]`;
             }
 
             const controller = new AbortController();
@@ -1354,7 +1746,12 @@
                     signal: controller.signal,
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ model: MODEL, messages: [{ role: 'user', content: instruction }], temperature: 1 })
+                    body: JSON.stringify({
+                        model: MODEL,
+                        messages: [{ role: 'user', content: instruction }],
+                        temperature: 0.9,
+                        max_tokens: 2200
+                    })
                 });
 
                 console.log('Worker response status:', response.status);
@@ -1362,7 +1759,10 @@
                 if (!response.ok) {
                     const errText = await response.text();
                     console.error('Worker error body:', errText);
-                    return null;
+                    if (response.status === 429) {
+                        return { status: 'rateLimited' };
+                    }
+                    return { status: 'error' };
                 }
 
                 const data = await response.json();
@@ -1370,12 +1770,15 @@
 
                 if (data?.error) {
                     console.error('API returned error field:', data.error);
-                    return null;
+                    if (data.error.code === 429) {
+                        return { status: 'rateLimited' };
+                    }
+                    return { status: 'error' };
                 }
 
                 if (!Array.isArray(data.choices) || data.choices.length === 0) {
                     console.error('No choices in response');
-                    return null;
+                    return { status: 'error' };
                 }
 
                 const choice = data.choices[0];
@@ -1384,15 +1787,19 @@
 
                 if (!content || typeof content !== 'string') {
                     console.error('Empty or invalid content');
-                    return null;
+                    return { status: 'error' };
                 }
 
-                const parsed = parsePromptBatchResponse(content);
+                const expectedCount = type === 'question' ? QUESTION_BATCH_SIZE : PHRASE_BATCH_SIZE;
+                const parsed = parsePromptBatchResponse(content, expectedCount);
                 console.log('Parsed prompts:', parsed);
-                return parsed;
+                if (!parsed || parsed.length === 0) {
+                    return { status: 'error' };
+                }
+                return { status: 'success', prompts: parsed };
             } catch (err) {
                 console.error('Fetch/generateAI exception:', err.name, err.message);
-                return null;
+                return { status: 'error' };
             } finally {
                 clearTimeout(timeoutId);
             }
@@ -1401,33 +1808,22 @@
         // GENERATE PROMPT
         // ================================
         function playSound(type) {
-            const path = soundFiles[type];
-            if (!path || soundLock) return;
+            console.log("Playing:", type);
 
-            try {
-                let audio = soundPlayers[type];
-                if (!audio) {
-                    audio = new Audio(path);
-                    audio.preload = 'auto';
-                    soundPlayers[type] = audio;
-                }
+            const audio = soundPlayers[type];
+            console.log(audio);
 
-                soundLock = true;
-                audio.currentTime = 0;
-                audio.play().catch(() => {
-                    console.log('Sound unavailable');
-                });
-
-                const releaseLock = () => {
-                    soundLock = false;
-                };
-
-                audio.addEventListener('ended', releaseLock, { once: true });
-                audio.addEventListener('error', releaseLock, { once: true });
-                setTimeout(releaseLock, 220);
-            } catch (err) {
-                console.log('Sound unavailable');
+            if (!audio) {
+                console.error("Audio element not found");
+                return;
             }
+
+            audio.pause();
+            audio.currentTime = 0;
+
+            audio.play()
+                .then(() => console.log("Played successfully"))
+                .catch(err => console.error("Play failed:", err));
         }
 
         function setStartButtonVisibility(visible) {
@@ -1438,19 +1834,112 @@
             button.setAttribute('aria-hidden', visible ? 'false' : 'true');
         }
 
-        function setGenerateButtonBusy(isBusy) {
-            const button = document.querySelector('.generate-btn');
-            if (!button) return;
-            button.disabled = isBusy;
-            button.style.opacity = isBusy ? '0.8' : '';
-            button.style.cursor = isBusy ? 'wait' : '';
+        let failureCounts = {};
+
+        function getFailureKey(category, type) {
+            return `${normalizeCategory(category)}::${type}`;
+        }
+
+        function recordFailure(category, type) {
+            const key = getFailureKey(category, type);
+            failureCounts[key] = (failureCounts[key] || 0) + 1;
+            return failureCounts[key];
+        }
+
+        function resetFailures(category, type) {
+            const key = getFailureKey(category, type);
+            failureCounts[key] = 0;
+        }
+
+        let pendingFallbackContext = null;
+        let isGenerating = false;
+
+        function showRateLimitNotice(category, type) {
+            pendingFallbackContext = { category, type };
+            const notice = document.getElementById('rateLimitNotice');
+            const text = notice.querySelector('.rate-limit-text');
+            text.textContent = "Daily AI generation limit reached. Would you like to use offline practice questions instead?";
+            notice.style.display = 'block';
+            document.getElementById('prompt').innerHTML = '<div class="placeholder">Daily limit reached</div>';
+            setStartButtonVisibility(false);
+        }
+
+        function hideRateLimitNotice() {
+            document.getElementById('rateLimitNotice').style.display = 'none';
+            pendingFallbackContext = null;
+        }
+
+        function showStruggleNotice(category, type) {
+            pendingFallbackContext = { category, type };
+            const notice = document.getElementById('rateLimitNotice');
+            const text = notice.querySelector('.rate-limit-text');
+            text.textContent = "The AI seems a bit clunky today. Want to use our offline practice questions instead?";
+            notice.style.display = 'block';
+            document.getElementById('prompt').innerHTML = '<div class="placeholder">AI having trouble</div>';
+            setStartButtonVisibility(false);
+        }
+
+        function confirmFallback(useIt) {
+            const ctx = pendingFallbackContext;
+            hideRateLimitNotice();
+            if (!ctx) return;
+
+            const promptBox = document.getElementById('prompt');
+
+            if (useIt) {
+                const fallbackPrompt = getFallbackPrompt(ctx.category, ctx.type);
+                promptBox.textContent = fallbackPrompt;
+                animatePromptBox();
+                syncChallengeToPresentation();
+                setStartButtonVisibility(true);
+            } else {
+                promptBox.innerHTML = '<div class="placeholder">Try again later</div>';
+                setStartButtonVisibility(false);
+            }
+        }
+
+        function setGenerationLock(locked) {
+            isGenerating = locked;
+
+            // Generate button
+            const generateBtn = document.querySelector(".generate-btn");
+            if (generateBtn) {
+                generateBtn.disabled = locked;
+                generateBtn.textContent = locked
+                    ? "Generating..."
+                    : "Generate Challenge";
+            }
+
+            // Surprise button
+            const surpriseBtn = document.querySelector(".surprise-btn");
+            if (surpriseBtn) {
+                surpriseBtn.disabled = locked;
+            }
+
+            // Start button
+            const startBtn = document.getElementById("startBtn");
+            if (startBtn) {
+                startBtn.disabled = locked;
+            }
+
+            // Category dropdown
+            const category = document.getElementById("category");
+            if (category) {
+                category.disabled = locked;
+            }
+
+            // Question / Phrase buttons
+            document.querySelectorAll(".type-toggle").forEach(btn => {
+                btn.disabled = locked;
+            });
+
+            document.body.classList.toggle("generating", locked);
         }
 
         function setPromptBoxState(state, message) {
             const promptBox = document.getElementById('prompt');
             if (!promptBox) return;
 
-            promptBox.textContent = message;
             promptBox.classList.remove('is-animating');
 
             if (state === 'loading') {
@@ -1459,10 +1948,12 @@
                 promptBox.style.background = '';
                 promptBox.style.borderColor = '';
             } else if (state === 'error') {
+                promptBox.textContent = message;
                 promptBox.style.color = '#ff8fa3';
                 promptBox.style.background = 'rgba(255, 111, 145, 0.12)';
                 promptBox.style.borderColor = 'rgba(255, 111, 145, 0.25)';
             } else {
+                promptBox.textContent = message;
                 promptBox.style.color = '';
                 promptBox.style.background = '';
                 promptBox.style.borderColor = '';
@@ -1491,6 +1982,10 @@
         }
 
         async function generatePrompt() {
+            if (isGenerating) return;
+
+            setGenerationLock(true);
+
             const type = document.getElementById("type").value;
             const category = document.getElementById("category").value;
             const promptBox = document.getElementById("prompt");
@@ -1498,19 +1993,23 @@
             console.log("Type:", type);
             console.log("Category:", category);
 
-            setGenerateButtonBusy(true);
+            console.log("About to play generate sound");
+            playSound('generate');
+
+            hideRateLimitNotice();
             setPromptBoxState('loading');
             setStartButtonVisibility(false);
             hideCompletionCard();
             stopTimer();
             syncChallengeToPresentation();
-            playSound('generate');
+            
 
             try {
                 const cachedPrompt = takeNextPromptFromCache(category, type);
 
                 if (cachedPrompt) {
-                    promptBox.textContent = cachedPrompt;
+                    resetFailures(category, type);
+                    setPromptBoxState('default', cachedPrompt);
                     addUsedPrompt(cachedPrompt, category, type);
                     animatePromptBox();
                     syncChallengeToPresentation();
@@ -1520,44 +2019,40 @@
 
                 const result = await generateAI(type, category);
 
-                if (Array.isArray(result) && result.length > 0) {
-                    savePromptBatchToCache(category, type, result);
+                if (result.status === 'success') {
+                    savePromptBatchToCache(category, type, result.prompts);
                     const nextPrompt = takeNextPromptFromCache(category, type);
 
                     if (nextPrompt) {
-                        promptBox.textContent = nextPrompt;
+                        resetFailures(category, type);
+                        setPromptBoxState('default', nextPrompt);
                         addUsedPrompt(nextPrompt, category, type);
                         animatePromptBox();
                         syncChallengeToPresentation();
                         setStartButtonVisibility(true);
                         return;
                     }
-                }
-
-                const cache = loadPromptCache();
-                const normalizedCategory = normalizeCategory(category);
-                const normalizedType = type === 'question' ? 'question' : 'phrase';
-                const cacheEntry = cache[normalizedCategory]?.[normalizedType];
-                const hasCachedPrompts = Array.isArray(cacheEntry?.remaining) && cacheEntry.remaining.length > 0;
-
-                if (!hasCachedPrompts) {
-                    setPromptBoxState('error', 'Generation failed. Please try again.');
-                    syncChallengeToPresentation();
-                    setStartButtonVisibility(false);
+                } else if (result.status === 'rateLimited') {
+                    resetFailures(category, type);
+                    showRateLimitNotice(category, type);
+                    return;
+                } else {
+                    const failCount = recordFailure(category, type);
+                    if (failCount >= 3) {
+                        resetFailures(category, type);
+                        showStruggleNotice(category, type);
+                    } else {
+                        setPromptBoxState('error', 'Generation failed. Please try again.');
+                        setStartButtonVisibility(false);
+                    }
                     return;
                 }
 
-                const fallbackPrompt = getFallbackPrompt(category, type);
-                promptBox.textContent = fallbackPrompt;
-                animatePromptBox();
-                syncChallengeToPresentation();
-                setStartButtonVisibility(true);
             } catch (err) {
                 setPromptBoxState('error', 'Generation failed. Please try again.');
-                syncChallengeToPresentation();
                 setStartButtonVisibility(false);
             } finally {
-                setGenerateButtonBusy(false);
+                    setGenerationLock(false);
             }
         }
 
@@ -1578,6 +2073,7 @@
         }
 
         function surpriseMe() {
+            if (isGenerating) return;
             const types = ['question', 'phrase'];
             const categorySelect = document.getElementById('category');
             const categories = Array.from(categorySelect.options).map(opt => opt.value);
@@ -1591,6 +2087,9 @@
 
         document.querySelectorAll('.type-toggle').forEach((toggle) => {
             toggle.addEventListener('click', () => {
+
+                if (isGenerating) return;
+
                 setTypeSelection(toggle.dataset.type);
             });
         });
@@ -1600,7 +2099,10 @@
         document.addEventListener('keydown', function (e) {
             if (e.code === 'Space') {
                 e.preventDefault();
-                generatePrompt();
+
+                if (!isGenerating) {
+                    generatePrompt();
+                }
             }
         });
 
@@ -1619,6 +2121,7 @@
         }
 
         function startTimer() {
+            if (isGenerating) return;
             const promptBox = document.getElementById('prompt');
             const challengeText = promptBox?.textContent?.trim() || '';
 
