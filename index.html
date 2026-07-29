@@ -2089,15 +2089,15 @@
 
             setGenerationLock(true);
 
+            console.log("About to play generate sound");
+            playSound('generate');
+
             const type = document.getElementById("type").value;
             const category = document.getElementById("category").value;
             const promptBox = document.getElementById("prompt");
 
             console.log("Type:", type);
             console.log("Category:", category);
-
-            console.log("About to play generate sound");
-            playSound('generate');
 
             hideRateLimitNotice();
             setPromptBoxState('loading');
