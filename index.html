@@ -338,6 +338,7 @@
 
         .rate-limit-notice {
             margin-top: 12px;
+            max-width: fit-content;
             padding: 1rem;
             border-radius: 16px;
             background: rgba(215, 90, 90, 0.08);
@@ -360,6 +361,7 @@
 
         .fallback-yes-btn {
             background: linear-gradient(135deg, rgba(101, 151, 255, 0.85), rgba(223, 130, 255, 0.7));
+            max-width: fit-content;
             color: #fff;
         }
 
@@ -413,11 +415,12 @@
         .close-btn {
             position: absolute;
             top: 16px;
-            right: 16px;
+            left: 16px; /* Moved to the left side for a natural "back" placement */
             z-index: 100;
-
-            width: 40px;
-            height: 40px;
+            width: 44px; /* Fixed width */
+            height: 44px; /* Fixed height */
+            padding: 0; /* Overrides the default button padding so the icon centers perfectly */
+            border-radius: 50%; /* Makes it a perfect circle */
         }
 
         .presentation-inner {
@@ -630,6 +633,53 @@
             pointer-events: none;
         }
 
+        /* Timer Settings Modal */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999;
+        }
+        
+        .modal-content {
+            background: var(--glass-strong);
+            padding: 30px;
+            border-radius: 20px;
+            width: min(90%, 340px);
+            text-align: center;
+            border: 1px solid var(--border);
+            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5);
+            color: var(--text);
+            animation: riseIn 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        /* Style the range slider */
+        input[type=range] {
+            accent-color: var(--blue);
+            height: 6px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.1);
+            appearance: auto;
+        }
+        
+        .settings-btn {
+            display: none;
+            opacity: 0;
+            transform: translateY(10px) scale(0.97);
+            margin-right: 8px;
+            padding: 0.9rem;
+            border-radius: 50%;
+        }
+        
+        .settings-btn.is-visible {
+            display: inline-flex;
+            max-width: fit-content;
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            animation: riseIn 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
         .footer {
             text-align: center;
             color: var(--muted);
@@ -695,11 +745,11 @@
             }
 
             .presentation-view {
-                padding: 18px;
+                padding: 16px;
             }
 
             .presentation-inner {
-                gap: 18px;
+                gap: 16px;
             }
 
             .presentation-prompt {
@@ -736,6 +786,8 @@
 
             .step {
                 border-radius: 16px;
+                width: 100%; /* Ensure each button takes the full width of the screen */
+                padding: 0.8rem;
             }
 
             .presentation-view {
@@ -744,6 +796,9 @@
 
             .guide {
                 width: 100%;
+                /* Change from horizontal row to vertical stack */
+                flex-direction: column; 
+                gap: 8px;
             }
 
             .ring-wrap {
@@ -752,6 +807,11 @@
 
             .timer {
                 font-size: 2rem;
+            }
+
+            .active {
+                /* The standard right-shift works perfectly for a vertical list */
+                transform: translateX(4px); 
             }
         }
 
@@ -834,15 +894,19 @@
                             </div>
                         </div>
                         <div class="challenge-actions">
-                            <button class="start-btn is-hidden" id="startBtn" onclick="startTimer()">Start 1-Minute
-                                Round</button>
+                            <button class="surprise-btn settings-btn is-hidden" id="settingsBtn" onclick="openTimerSettings()" aria-label="Settings">⚙️</button>
+                            <button class="start-btn is-hidden" id="startBtn" onclick="startTimer()">Start 1-Minute Round</button>
                         </div>
                     </div>
                 </div>
             </section>
 
             <section class="presentation-view" id="presentationView" aria-hidden="true">
-                <button class="close-btn" onclick="exitPresentationMode()">Close</button>
+                <button class="close-btn" onclick="exitPresentationMode()" aria-label="Go back">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
                 <div class="presentation-inner">
                     <div class="presentation-challenge">
                         <p class="challenge-label">Current Challenge</p>
@@ -1826,12 +1890,51 @@
                 .catch(err => console.error("Play failed:", err));
         }
 
+        let activeMinutes = 1; // Store the chosen time globally
+
         function setStartButtonVisibility(visible) {
             const button = document.getElementById('startBtn');
-            if (!button) return;
-            button.classList.toggle('is-visible', visible);
-            button.classList.toggle('is-hidden', !visible);
-            button.setAttribute('aria-hidden', visible ? 'false' : 'true');
+            const settingsBtn = document.getElementById('settingsBtn');
+            
+            if (button) {
+                button.classList.toggle('is-visible', visible);
+                button.classList.toggle('is-hidden', !visible);
+                button.setAttribute('aria-hidden', visible ? 'false' : 'true');
+            }
+            if (settingsBtn) {
+                settingsBtn.classList.toggle('is-visible', visible);
+                settingsBtn.classList.toggle('is-hidden', !visible);
+            }
+        }
+
+        // --- NEW MODAL LOGIC ---
+        function openTimerSettings() {
+            document.getElementById('timerModal').style.display = 'flex';
+            document.getElementById('timerSlider').value = activeMinutes;
+            updateSliderDisplay(activeMinutes);
+        }
+
+        function closeTimerSettings() {
+            document.getElementById('timerModal').style.display = 'none';
+        }
+
+        function updateSliderDisplay(val) {
+            document.getElementById('sliderValueDisplay').textContent = val;
+            document.getElementById('sliderPlural').textContent = val > 1 ? 's' : '';
+        }
+
+        function saveTimerSettings() {
+            activeMinutes = parseInt(document.getElementById('timerSlider').value, 10);
+            
+            // Update global timer variables
+            totalTime = activeMinutes * 60;
+            timeLeft = totalTime;
+            
+            // Update UI buttons
+            document.getElementById('startBtn').textContent = `Start ${activeMinutes}-Minute Round`;
+            document.getElementById('timer').textContent = `${activeMinutes.toString().padStart(2, '0')}:00`;
+            
+            closeTimerSettings();
         }
 
         let failureCounts = {};
@@ -2196,13 +2299,20 @@
         function updateGuide() {
             clearSteps();
 
-            if (timeLeft <= 60 && timeLeft >= 50) {
+            // Calculate percentage of time remaining (1.0 down to 0.0)
+            const p = timeLeft / totalTime;
+
+            if (p > 0.833) {
+                // First ~17% of time
                 activateStep('point');
-            } else if (timeLeft < 50 && timeLeft >= 35) {
+            } else if (p > 0.583) {
+                // Next 25% of time
                 activateStep('reason');
-            } else if (timeLeft < 35 && timeLeft >= 10) {
+            } else if (p > 0.166) {
+                // Next ~42% of time
                 activateStep('example');
-            } else if (timeLeft < 10) {
+            } else {
+                // Final ~16% of time
                 activateStep('conclusion');
             }
         }
@@ -2252,6 +2362,32 @@
             playSound('finish');
         }
     </script>
+
+    <!-- Timer Settings Modal -->
+    <div class="modal-overlay" id="timerModal" style="display: none;">
+        <div class="modal-content">
+            <h3 style="margin-bottom: 15px; font-family: 'Cormorant Garamond', serif; font-size: 1.5rem;">Adjust Timer</h3>
+            <div style="margin: 20px 0;">
+                <label style="font-size: 1.2rem; font-weight: 600; color: var(--blue);">
+                    <span id="sliderValueDisplay">1</span> minute<span id="sliderPlural"></span>
+                </label>
+                <input 
+                    type="range" 
+                    id="timerSlider" 
+                    min="1" 
+                    max="30" 
+                    step="1" 
+                    value="1" 
+                    oninput="updateSliderDisplay(this.value)"
+                    style="width: 100%; margin-top: 15px; cursor: pointer;"
+                />
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+                <button class="surprise-btn" onclick="closeTimerSettings()">Cancel</button>
+                <button class="generate-btn" onclick="saveTimerSettings()">Save</button>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>
