@@ -1976,12 +1976,96 @@
             }
         }
 
+        function getFallbackPrompt(category, type) {
+            return takeLocalChallengePrompt(category, type);
+        }
+
+        function hideLocalEmptyNotice() {
+            const notice = document.getElementById('localEmptyNotice');
+            if (notice) {
+                notice.style.display = 'none';
+            }
+        }
+
+        function showLocalChallengeEmptyState(message = 'You have emptied this category. Try other combinations!') {
+            const promptBox = document.getElementById('prompt');
+            const notice = document.getElementById('localEmptyNotice');
+            const text = document.getElementById('localEmptyText');
+
+            if (promptBox) {
+                promptBox.innerHTML = '<div class="placeholder">You have emptied this category. Try other combinations!</div>';
+            }
+
+            if (text) {
+                text.textContent = message;
+            }
+
+            if (notice) {
+                notice.style.display = 'block';
+            }
+
+            setStartButtonVisibility(false);
+        }
+
+        async function forceGenerateMoreChallenges() {
+            if (isGenerating) return;
+
+            const type = document.getElementById('type').value;
+            const category = document.getElementById('category').value;
+
+            hideRateLimitNotice();
+            hideLocalEmptyNotice();
+            setGenerationLock(true);
+            setPromptBoxState('loading');
+            hideCompletionCard();
+            stopTimer();
+            syncChallengeToPresentation();
+
+            try {
+                const result = await generateAI(type, category, REFILL_AI_BATCH_SIZE);
+
+                if (result.status === 'success') {
+                    savePromptBatchToCache(category, type, result.prompts);
+
+                    const nextPrompt = takeNextPromptFromCache(category, type);
+                    if (nextPrompt) {
+                        resetFailures(category, type);
+                        setPromptBoxState('default', nextPrompt);
+                        addUsedPrompt(nextPrompt, category, type);
+                        animatePromptBox();
+                        syncChallengeToPresentation();
+                        setStartButtonVisibility(true);
+                        return;
+                    }
+
+                    showLocalChallengeEmptyState();
+                    return;
+                }
+
+                if (result.status === 'rateLimited') {
+                    showLocalChallengeEmptyState('AI refill is unavailable until tomorrow.');
+                    return;
+                }
+
+                showLocalChallengeEmptyState('Could not generate more prompts right now.');
+            } catch (err) {
+                showLocalChallengeEmptyState('Could not generate more prompts right now.');
+            } finally {
+                setGenerationLock(false);
+            }
+        }
+
         function showRateLimitNotice(category, type) {
             pendingFallbackContext = { category, type };
 
             if (isLocalLibraryActive()) {
                 const fallbackPrompt = getFallbackPrompt(category, type);
-                document.getElementById('prompt').textContent = fallbackPrompt;
+                if (!fallbackPrompt) {
+                    showLocalChallengeEmptyState();
+                    return;
+                }
+
+                setPromptBoxState('default', fallbackPrompt);
                 animatePromptBox();
                 syncChallengeToPresentation();
                 setStartButtonVisibility(true);
@@ -1997,7 +2081,10 @@
         }
 
         function hideRateLimitNotice() {
-            document.getElementById('rateLimitNotice').style.display = 'none';
+            const notice = document.getElementById('rateLimitNotice');
+            if (notice) {
+                notice.style.display = 'none';
+            }
             pendingFallbackContext = null;
         }
 
@@ -2012,81 +2099,6 @@
         }
 
         function confirmFallback(useIt) {
-            function hideLocalEmptyNotice() {
-                const notice = document.getElementById('localEmptyNotice');
-                if (notice) {
-                    notice.style.display = 'none';
-                }
-            }
-
-            function showLocalChallengeEmptyState(message = 'You have emptied this category. Try other combinations!') {
-                const promptBox = document.getElementById('prompt');
-                const notice = document.getElementById('localEmptyNotice');
-                const text = document.getElementById('localEmptyText');
-
-                if (promptBox) {
-                    promptBox.innerHTML = '<div class="placeholder">You have emptied this category. Try other combinations!</div>';
-                }
-
-                if (text) {
-                    text.textContent = message;
-                }
-
-                if (notice) {
-                    notice.style.display = 'block';
-                }
-
-                setStartButtonVisibility(false);
-            }
-
-            async function forceGenerateMoreChallenges() {
-                if (isGenerating) return;
-
-                const type = document.getElementById('type').value;
-                const category = document.getElementById('category').value;
-                const promptBox = document.getElementById('prompt');
-
-                hideRateLimitNotice();
-                hideLocalEmptyNotice();
-                setGenerationLock(true);
-                setPromptBoxState('loading');
-                hideCompletionCard();
-                stopTimer();
-                syncChallengeToPresentation();
-
-                try {
-                    const result = await generateAI(type, category, REFILL_AI_BATCH_SIZE);
-
-                    if (result.status === 'success') {
-                        savePromptBatchToCache(category, type, result.prompts);
-
-                        const nextPrompt = takeNextPromptFromCache(category, type);
-                        if (nextPrompt) {
-                            resetFailures(category, type);
-                            setPromptBoxState('default', nextPrompt);
-                            addUsedPrompt(nextPrompt, category, type);
-                            animatePromptBox();
-                            syncChallengeToPresentation();
-                            setStartButtonVisibility(true);
-                            return;
-                        }
-
-                        showLocalChallengeEmptyState();
-                        return;
-                    }
-
-                    if (result.status === 'rateLimited') {
-                        showLocalChallengeEmptyState('AI refill is unavailable until tomorrow.');
-                        return;
-                    }
-
-                    showLocalChallengeEmptyState('Could not generate more prompts right now.');
-                } catch (err) {
-                    showLocalChallengeEmptyState('Could not generate more prompts right now.');
-                } finally {
-                    setGenerationLock(false);
-                }
-            }
             const ctx = pendingFallbackContext;
             hideRateLimitNotice();
             if (!ctx) return;
@@ -2097,12 +2109,19 @@
                 setLocalLibraryActive(true);
 
                 const fallbackPrompt = getFallbackPrompt(ctx.category, ctx.type);
-                promptBox.textContent = fallbackPrompt;
+                if (!fallbackPrompt) {
+                    showLocalChallengeEmptyState();
+                    return;
+                }
+
+                setPromptBoxState('default', fallbackPrompt);
                 animatePromptBox();
                 syncChallengeToPresentation();
                 setStartButtonVisibility(true);
             } else {
-                promptBox.innerHTML = '<div class="placeholder">Try again later</div>';
+                if (promptBox) {
+                    promptBox.innerHTML = '<div class="placeholder">Try again later</div>';
+                }
                 setStartButtonVisibility(false);
             }
         }
