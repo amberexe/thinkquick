@@ -972,7 +972,6 @@
     <audio id="startSound" src="sounds/start.mp3" preload="auto"></audio>
     <audio id="finishSound" src="sounds/finish.mp3" preload="auto"></audio>
     <script>
-        // TODO: remove before pushing - CVDR{00ooPs!}
         const WORKER_URL = "https://think-quick.amberprincessrosana.workers.dev/";
         const MODEL = "nvidia/nemotron-3-super-120b-a12b:free";
         const soundPlayers = {
@@ -1776,6 +1775,11 @@
 
         async function generateAI(type, category, batchSize = DEFAULT_AI_BATCH_SIZE) {
             console.log('generateAI called with', { type, category });
+            console.log('generateAI called with', { type, category });
+            console.log('Worker response status:', response.status);
+            console.log('Worker response data:', data);
+            console.log('Raw content from model:', content);
+            console.log('Parsed prompts:', parsed);
 
             let instruction;
             if (type === 'question') {
@@ -1879,10 +1883,11 @@
         // GENERATE PROMPT
         // ================================
         function playSound(type) {
-            console.log("Playing:", type);
+            console.log("About to play generate sound");
+            console.log("Type:", type);
+            console.log("Category:", category);
 
             const audio = soundPlayers[type];
-            console.log(audio);
 
             if (!audio) {
                 console.error("Audio element not found");
