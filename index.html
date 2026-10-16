@@ -415,12 +415,17 @@
         .close-btn {
             position: absolute;
             top: 16px;
-            left: 16px; /* Moved to the left side for a natural "back" placement */
+            left: 16px;
+            /* Moved to the left side for a natural "back" placement */
             z-index: 100;
-            width: 44px; /* Fixed width */
-            height: 44px; /* Fixed height */
-            padding: 0; /* Overrides the default button padding so the icon centers perfectly */
-            border-radius: 50%; /* Makes it a perfect circle */
+            width: 44px;
+            /* Fixed width */
+            height: 44px;
+            /* Fixed height */
+            padding: 0;
+            /* Overrides the default button padding so the icon centers perfectly */
+            border-radius: 50%;
+            /* Makes it a perfect circle */
         }
 
         .presentation-inner {
@@ -635,13 +640,19 @@
 
         /* Timer Settings Modal */
         .modal-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             background-color: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(8px);
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             z-index: 9999;
         }
-        
+
         .modal-content {
             background: var(--glass-strong);
             padding: 30px;
@@ -662,7 +673,7 @@
             background: rgba(255, 255, 255, 0.1);
             appearance: auto;
         }
-        
+
         .settings-btn {
             display: none;
             opacity: 0;
@@ -671,7 +682,7 @@
             padding: 0.9rem;
             border-radius: 50%;
         }
-        
+
         .settings-btn.is-visible {
             display: inline-flex;
             max-width: fit-content;
@@ -786,7 +797,8 @@
 
             .step {
                 border-radius: 16px;
-                width: 100%; /* Ensure each button takes the full width of the screen */
+                width: 100%;
+                /* Ensure each button takes the full width of the screen */
                 padding: 0.8rem;
             }
 
@@ -797,7 +809,7 @@
             .guide {
                 width: 100%;
                 /* Change from horizontal row to vertical stack */
-                flex-direction: column; 
+                flex-direction: column;
                 gap: 8px;
             }
 
@@ -811,7 +823,7 @@
 
             .active {
                 /* The standard right-shift works perfectly for a vertical list */
-                transform: translateX(4px); 
+                transform: translateX(4px);
             }
         }
 
@@ -829,7 +841,6 @@
         body.generating .generate-btn {
             opacity: .85;
         }
-
     </style>
 </head>
 
@@ -885,17 +896,28 @@
                             <div class="placeholder">YOUR CHALLENGE</div>
                         </div>
                         <div class="rate-limit-notice" id="rateLimitNotice" style="display:none;">
-                            <p class="rate-limit-text">Daily AI generation limit reached. Would you like to use offline
-                                practice questions instead?</p>
+                            <p class="rate-limit-text">Daily AI generation limit reached. Would you like to use the
+                                Local Challenge Library instead?</p>
                             <div class="rate-limit-actions">
-                                <button class="fallback-yes-btn" onclick="confirmFallback(true)">Use Offline
-                                    Questions</button>
+                                <button class="fallback-yes-btn" onclick="confirmFallback(true)">Use Local Challenge
+                                    Library</button>
                                 <button class="fallback-no-btn" onclick="confirmFallback(false)">Cancel</button>
                             </div>
                         </div>
+                        <div class="rate-limit-notice local-empty-notice" id="localEmptyNotice" style="display:none;">
+                            <p class="rate-limit-text" id="localEmptyText">You have emptied this category. Try other
+                                combinations!</p>
+                            <div class="rate-limit-actions">
+                                <button class="fallback-yes-btn" onclick="forceGenerateMoreChallenges()">Force AI to
+                                    generate 20 more</button>
+                                <button class="fallback-no-btn" onclick="hideLocalEmptyNotice()">Cancel</button>
+                            </div>
+                        </div>
                         <div class="challenge-actions">
-                            <button class="surprise-btn settings-btn is-hidden" id="settingsBtn" onclick="openTimerSettings()" aria-label="Settings">⚙️</button>
-                            <button class="start-btn is-hidden" id="startBtn" onclick="startTimer()">Start 1-Minute Round</button>
+                            <button class="surprise-btn settings-btn is-hidden" id="settingsBtn"
+                                onclick="openTimerSettings()" aria-label="Settings">⚙️</button>
+                            <button class="start-btn is-hidden" id="startBtn" onclick="startTimer()">Start 1-Minute
+                                Round</button>
                         </div>
                     </div>
                 </div>
@@ -903,7 +925,8 @@
 
             <section class="presentation-view" id="presentationView" aria-hidden="true">
                 <button class="close-btn" onclick="exitPresentationMode()" aria-label="Go back">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="15 18 9 12 15 6"></polyline>
                     </svg>
                 </button>
@@ -1646,7 +1669,7 @@
         // ================================
         // FALLBACK PROMPT SYSTEM
         // ================================
-        function getFallbackPrompt(category, type) {
+        function takeLocalChallengePrompt(category, type) {
             const normalizedCategory = normalizeCategory(category);
             const poolCategory = promptPool[normalizedCategory] || promptPool.general;
             const history = loadUsedPrompts();
@@ -1664,7 +1687,7 @@
 
             const availableSources = sourceOptions.filter((source) => source.prompts.length > 0);
             if (availableSources.length === 0) {
-                return 'Unable to generate a challenge. Please try again.';
+                return null;
             }
 
             const usableSources = availableSources.filter((source) => {
@@ -1672,34 +1695,19 @@
                 return source.prompts.some((prompt) => !usedPrompts.includes(prompt));
             });
 
-            let selectedSource;
-
             if (usableSources.length === 0) {
-                availableSources.forEach((source) => {
-                    clearUsedPrompts(normalizedCategory, source.key);
-                });
-
-                selectedSource = availableSources[Math.floor(Math.random() * availableSources.length)];
-            } else {
-                selectedSource = usableSources[Math.floor(Math.random() * usableSources.length)];
+                return null;
             }
 
-            const usedPrompts = loadUsedPrompts()[normalizedCategory]?.[selectedSource.key] || [];
+            const selectedSource = usableSources[Math.floor(Math.random() * usableSources.length)];
+            const usedPrompts = history[normalizedCategory]?.[selectedSource.key] || [];
             const remainingPrompts = selectedSource.prompts.filter((prompt) => !usedPrompts.includes(prompt));
 
             if (remainingPrompts.length === 0) {
-                const freshHistory = loadUsedPrompts();
-                const resetUsedPrompts = freshHistory[normalizedCategory]?.[selectedSource.key] || [];
-                const freshRemaining = selectedSource.prompts.filter((prompt) => !resetUsedPrompts.includes(prompt));
-
-                if (freshRemaining.length === 0) {
-                    const fallbackPrompt = selectedSource.prompts[0] || 'Unable to generate a challenge. Please try again.';
-                    addUsedPrompt(fallbackPrompt, normalizedCategory, selectedSource.key);
-                    return fallbackPrompt;
-                }
+                return null;
             }
 
-            const selectedPrompt = remainingPrompts[Math.floor(Math.random() * remainingPrompts.length)] || selectedSource.prompts[0] || 'Unable to generate a challenge. Please try again.';
+            const selectedPrompt = remainingPrompts[Math.floor(Math.random() * remainingPrompts.length)];
             addUsedPrompt(selectedPrompt, normalizedCategory, selectedSource.key);
             return selectedPrompt;
         }
@@ -1733,7 +1741,7 @@
                 try {
                     const parsed = JSON.parse(candidate);
                     if (!Array.isArray(parsed)) continue;
-                    const clean = normalizePromptBatch(parsed).filter(isRealItem).filter(item => !ALL_CATEGORIES.includes(item.trim().toLowerCase()));                    if (clean.length < minAcceptable) continue;
+                    const clean = normalizePromptBatch(parsed).filter(isRealItem).filter(item => !ALL_CATEGORIES.includes(item.trim().toLowerCase())); if (clean.length < minAcceptable) continue;
                     // Prefer whichever candidate is closest to the expected count,
                     // and prefer later candidates on ties (real answer usually comes last)
                     if (!best || Math.abs(clean.length - expectedCount) <= Math.abs(best.length - expectedCount)) {
@@ -1754,17 +1762,17 @@
                 .map(m => m.slice(1, -1).replace(/\\"/g, '"'))
                 .filter(s => s.trim().length > 0);
 
-            const clean = normalizePromptBatch(salvaged).filter(isRealItem).filter(item => !ALL_CATEGORIES.includes(item.trim().toLowerCase()));            return clean.length >= minAcceptable ? clean : null;
+            const clean = normalizePromptBatch(salvaged).filter(isRealItem).filter(item => !ALL_CATEGORIES.includes(item.trim().toLowerCase())); return clean.length >= minAcceptable ? clean : null;
         }
         function isRealItem(item) {
             const placeholderPattern = /^(question|item|word|phrase|example)\s*\d*$/i;
             return !placeholderPattern.test(item.trim());
         }
 
-        const QUESTION_BATCH_SIZE = 10;
-        const PHRASE_BATCH_SIZE = 10;
+        const DEFAULT_AI_BATCH_SIZE = 10;
+        const REFILL_AI_BATCH_SIZE = 20;
 
-        async function generateAI(type, category) {
+        async function generateAI(type, category, batchSize = DEFAULT_AI_BATCH_SIZE) {
             console.log('generateAI called with', { type, category });
 
             let instruction;
@@ -1772,8 +1780,7 @@
                 instruction = `
                 
                 - Do not think out loud, do not explain, do not show reasoning
-                - Output ONLY a JSON array of exactly ${QUESTION_BATCH_SIZE} unique impromptu speaking questions 9sentence) about "${category}".
-
+                - Output ONLY a JSON array of exactly ${batchSize} unique impromptu speaking questions sentence) about "${category}".
                 STRICT FORMAT RULES:
                 
                 - Your entire response must be a single JSON array, nothing else
@@ -1784,13 +1791,12 @@
                 - Enclose each sentence with quoation marks
 
                 Example format: ["What is one way technology has changed daily life?", "How might renewable energy shape the next decade?"]`;
-            }   
+            }
             else {
                 instruction = `
                 
                 - Do not think out loud, do not explain, do not show reasoning
-                - Output ONLY a JSON array of exactly ${PHRASE_BATCH_SIZE} unique short speaking-practice words or phrases about "${category}".
-
+                - Output ONLY a JSON array of exactly ${batchSize} unique short speaking-practice words or phrases about "${category}".
                 STRICT FORMAT RULES:
                 - Your entire response must be a single JSON array, nothing else
                 - Do not write anything before the array or after it
@@ -1854,8 +1860,7 @@
                     return { status: 'error' };
                 }
 
-                const expectedCount = type === 'question' ? QUESTION_BATCH_SIZE : PHRASE_BATCH_SIZE;
-                const parsed = parsePromptBatchResponse(content, expectedCount);
+                const parsed = parsePromptBatchResponse(content, batchSize);
                 console.log('Parsed prompts:', parsed);
                 if (!parsed || parsed.length === 0) {
                     return { status: 'error' };
@@ -1895,7 +1900,7 @@
         function setStartButtonVisibility(visible) {
             const button = document.getElementById('startBtn');
             const settingsBtn = document.getElementById('settingsBtn');
-            
+
             if (button) {
                 button.classList.toggle('is-visible', visible);
                 button.classList.toggle('is-hidden', !visible);
@@ -1925,15 +1930,15 @@
 
         function saveTimerSettings() {
             activeMinutes = parseInt(document.getElementById('timerSlider').value, 10);
-            
+
             // Update global timer variables
             totalTime = activeMinutes * 60;
             timeLeft = totalTime;
-            
+
             // Update UI buttons
             document.getElementById('startBtn').textContent = `Start ${activeMinutes}-Minute Round`;
             document.getElementById('timer').textContent = `${activeMinutes.toString().padStart(2, '0')}:00`;
-            
+
             closeTimerSettings();
         }
 
@@ -1957,11 +1962,35 @@
         let pendingFallbackContext = null;
         let isGenerating = false;
 
+        const LOCAL_LIBRARY_KEY = 'think-quick-local-library-active-v1';
+
+        function isLocalLibraryActive() {
+            return localStorage.getItem(LOCAL_LIBRARY_KEY) === 'true';
+        }
+
+        function setLocalLibraryActive(active) {
+            if (active) {
+                localStorage.setItem(LOCAL_LIBRARY_KEY, 'true');
+            } else {
+                localStorage.removeItem(LOCAL_LIBRARY_KEY);
+            }
+        }
+
         function showRateLimitNotice(category, type) {
             pendingFallbackContext = { category, type };
+
+            if (isLocalLibraryActive()) {
+                const fallbackPrompt = getFallbackPrompt(category, type);
+                document.getElementById('prompt').textContent = fallbackPrompt;
+                animatePromptBox();
+                syncChallengeToPresentation();
+                setStartButtonVisibility(true);
+                return;
+            }
+
             const notice = document.getElementById('rateLimitNotice');
             const text = notice.querySelector('.rate-limit-text');
-            text.textContent = "Daily AI generation limit reached. Would you like to use offline practice questions instead?";
+            text.textContent = "Daily AI generation limit reached. Would you like to use the Local Challenge Library instead?";
             notice.style.display = 'block';
             document.getElementById('prompt').innerHTML = '<div class="placeholder">Daily limit reached</div>';
             setStartButtonVisibility(false);
@@ -1983,6 +2012,81 @@
         }
 
         function confirmFallback(useIt) {
+            function hideLocalEmptyNotice() {
+                const notice = document.getElementById('localEmptyNotice');
+                if (notice) {
+                    notice.style.display = 'none';
+                }
+            }
+
+            function showLocalChallengeEmptyState(message = 'You have emptied this category. Try other combinations!') {
+                const promptBox = document.getElementById('prompt');
+                const notice = document.getElementById('localEmptyNotice');
+                const text = document.getElementById('localEmptyText');
+
+                if (promptBox) {
+                    promptBox.innerHTML = '<div class="placeholder">You have emptied this category. Try other combinations!</div>';
+                }
+
+                if (text) {
+                    text.textContent = message;
+                }
+
+                if (notice) {
+                    notice.style.display = 'block';
+                }
+
+                setStartButtonVisibility(false);
+            }
+
+            async function forceGenerateMoreChallenges() {
+                if (isGenerating) return;
+
+                const type = document.getElementById('type').value;
+                const category = document.getElementById('category').value;
+                const promptBox = document.getElementById('prompt');
+
+                hideRateLimitNotice();
+                hideLocalEmptyNotice();
+                setGenerationLock(true);
+                setPromptBoxState('loading');
+                hideCompletionCard();
+                stopTimer();
+                syncChallengeToPresentation();
+
+                try {
+                    const result = await generateAI(type, category, REFILL_AI_BATCH_SIZE);
+
+                    if (result.status === 'success') {
+                        savePromptBatchToCache(category, type, result.prompts);
+
+                        const nextPrompt = takeNextPromptFromCache(category, type);
+                        if (nextPrompt) {
+                            resetFailures(category, type);
+                            setPromptBoxState('default', nextPrompt);
+                            addUsedPrompt(nextPrompt, category, type);
+                            animatePromptBox();
+                            syncChallengeToPresentation();
+                            setStartButtonVisibility(true);
+                            return;
+                        }
+
+                        showLocalChallengeEmptyState();
+                        return;
+                    }
+
+                    if (result.status === 'rateLimited') {
+                        showLocalChallengeEmptyState('AI refill is unavailable until tomorrow.');
+                        return;
+                    }
+
+                    showLocalChallengeEmptyState('Could not generate more prompts right now.');
+                } catch (err) {
+                    showLocalChallengeEmptyState('Could not generate more prompts right now.');
+                } finally {
+                    setGenerationLock(false);
+                }
+            }
             const ctx = pendingFallbackContext;
             hideRateLimitNotice();
             if (!ctx) return;
@@ -1990,6 +2094,8 @@
             const promptBox = document.getElementById('prompt');
 
             if (useIt) {
+                setLocalLibraryActive(true);
+
                 const fallbackPrompt = getFallbackPrompt(ctx.category, ctx.type);
                 promptBox.textContent = fallbackPrompt;
                 animatePromptBox();
@@ -2105,59 +2211,78 @@
             hideCompletionCard();
             stopTimer();
             syncChallengeToPresentation();
-            
+
 
             try {
-                const cachedPrompt = takeNextPromptFromCache(category, type);
+    const cachedPrompt = takeNextPromptFromCache(category, type);
 
-                if (cachedPrompt) {
-                    resetFailures(category, type);
-                    setPromptBoxState('default', cachedPrompt);
-                    addUsedPrompt(cachedPrompt, category, type);
-                    animatePromptBox();
-                    syncChallengeToPresentation();
-                    setStartButtonVisibility(true);
-                    return;
-                }
+    if (cachedPrompt) {
+        resetFailures(category, type);
+        setPromptBoxState('default', cachedPrompt);
+        addUsedPrompt(cachedPrompt, category, type);
+        animatePromptBox();
+        syncChallengeToPresentation();
+        setStartButtonVisibility(true);
+        return;
+    }
 
-                const result = await generateAI(type, category);
+    if (isLocalLibraryActive()) {
+        const localPrompt = takeLocalChallengePrompt(category, type);
 
-                if (result.status === 'success') {
-                    savePromptBatchToCache(category, type, result.prompts);
-                    const nextPrompt = takeNextPromptFromCache(category, type);
-
-                    if (nextPrompt) {
-                        resetFailures(category, type);
-                        setPromptBoxState('default', nextPrompt);
-                        addUsedPrompt(nextPrompt, category, type);
-                        animatePromptBox();
-                        syncChallengeToPresentation();
-                        setStartButtonVisibility(true);
-                        return;
-                    }
-                } else if (result.status === 'rateLimited') {
-                    resetFailures(category, type);
-                    showRateLimitNotice(category, type);
-                    return;
-                } else {
-                    const failCount = recordFailure(category, type);
-                    if (failCount >= 3) {
-                        resetFailures(category, type);
-                        showStruggleNotice(category, type);
-                    } else {
-                        setPromptBoxState('error', 'Generation failed. Please try again.');
-                        setStartButtonVisibility(false);
-                    }
-                    return;
-                }
-
-            } catch (err) {
-                setPromptBoxState('error', 'Generation failed. Please try again.');
-                setStartButtonVisibility(false);
-            } finally {
-                    setGenerationLock(false);
-            }
+        if (localPrompt) {
+            resetFailures(category, type);
+            setPromptBoxState('default', localPrompt);
+            addUsedPrompt(localPrompt, category, type);
+            animatePromptBox();
+            syncChallengeToPresentation();
+            setStartButtonVisibility(true);
+            return;
         }
+
+        showLocalChallengeEmptyState();
+        return;
+    }
+
+    setPromptBoxState('loading');
+
+    const result = await generateAI(type, category);
+
+    if (result.status === 'success') {
+        savePromptBatchToCache(category, type, result.prompts);
+        const nextPrompt = takeNextPromptFromCache(category, type);
+
+        if (nextPrompt) {
+            resetFailures(category, type);
+            setPromptBoxState('default', nextPrompt);
+            addUsedPrompt(nextPrompt, category, type);
+            animatePromptBox();
+            syncChallengeToPresentation();
+            setStartButtonVisibility(true);
+            return;
+        }
+    } else if (result.status === 'rateLimited') {
+        resetFailures(category, type);
+        showRateLimitNotice(category, type);
+        return;
+    } else {
+        const failCount = recordFailure(category, type);
+        if (failCount >= 3) {
+            resetFailures(category, type);
+            showStruggleNotice(category, type);
+        } else {
+            setPromptBoxState('error', 'Generation failed. Please try again.');
+            setStartButtonVisibility(false);
+        }
+        return;
+    }
+} catch (err) {
+    setPromptBoxState('error', 'Generation failed. Please try again.');
+    setStartButtonVisibility(false);
+} finally {
+    setGenerationLock(false);
+}
+}
+        function syncChallengeToPresentation() {
 
         function syncChallengeToPresentation() {
             const promptBox = document.getElementById('prompt');
@@ -2366,21 +2491,14 @@
     <!-- Timer Settings Modal -->
     <div class="modal-overlay" id="timerModal" style="display: none;">
         <div class="modal-content">
-            <h3 style="margin-bottom: 15px; font-family: 'Cormorant Garamond', serif; font-size: 1.5rem;">Adjust Timer</h3>
+            <h3 style="margin-bottom: 15px; font-family: 'Cormorant Garamond', serif; font-size: 1.5rem;">Adjust Timer
+            </h3>
             <div style="margin: 20px 0;">
                 <label style="font-size: 1.2rem; font-weight: 600; color: var(--blue);">
                     <span id="sliderValueDisplay">1</span> minute<span id="sliderPlural"></span>
                 </label>
-                <input 
-                    type="range" 
-                    id="timerSlider" 
-                    min="1" 
-                    max="30" 
-                    step="1" 
-                    value="1" 
-                    oninput="updateSliderDisplay(this.value)"
-                    style="width: 100%; margin-top: 15px; cursor: pointer;"
-                />
+                <input type="range" id="timerSlider" min="1" max="30" step="1" value="1"
+                    oninput="updateSliderDisplay(this.value)" style="width: 100%; margin-top: 15px; cursor: pointer;" />
             </div>
             <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
                 <button class="surprise-btn" onclick="closeTimerSettings()">Cancel</button>
